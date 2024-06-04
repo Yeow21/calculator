@@ -84,6 +84,7 @@ public class Vtso
      */
     public int daysIntoRotation(LocalDate date)
     {
+        //test 
         // working out the shift number of the person who needs cover
         long daysSinceFirstShift = ChronoUnit.DAYS.between(getFirstShiftDate(), date);
         long daysIntoRotation = daysSinceFirstShift % rotationLength;
