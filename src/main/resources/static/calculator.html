@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Calculator Form</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<h1>Calculator Form</h1>
+<form action="#" th:action="@{/calculator}" method="post" th:object="${calculator}">
+    <label>Full name:</label>
+    <input type="text" th:field="*{name}" /><br/>
+
+    <label>Year</label>
+    <input type="text" th:field="*{year}" /><br/>
+
+    <label>Month</label>
+    <input type="text" th:field="*{month}" /><br/>
+
+    <label>Day</label>
+    <input type="text" th:field="*{day}" /><br/>
+
+    <label>Deskside</label>
+    <input type="text" th:field="*{deskSide}" /><br/>
+
+    <label>Letter:</label>
+    <select th:field="*{letter}">
+        <option th:each="p : ${listOfficers}" th:value="${p}" th:text="${p}"></option>
+    </select>
+    <br/>
+
+
+    <button type="submit">Register</button>
+
+</form>
+</body>
+</html>

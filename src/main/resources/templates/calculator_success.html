@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="ISO-8859-1">
+  <title>Registration Success</title>
+  <style type="text/css">
+    span {
+        display: inline-block;
+        width: 200px;
+        text-align: left;
+    }
+  </style>
+</head>
+<body>
+<div align="center">
+  <h2>Registration Succeeded!</h2>
+  <span>name:</span><span th:text="${calculator.name}"></span><br/>
+  <span>Date:</span><span th:text="${calculator.date}"></span><br/>
+  <span>Desk side</span><span th:text="${calculator.deskSide}"></span><br/>
+  <span>Letter</span><span th:text="${calculator.letter}"></span><br/>
+  <span>map</span><span th:text="${calculator.coverMap}"></span><br/>
+
+
+</div>
+</body>
+</html>
