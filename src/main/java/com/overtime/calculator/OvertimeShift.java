@@ -211,6 +211,7 @@ public class OvertimeShift
                     }
                 }
 
+                // change to commit
                 for (Vtso officer : marineOperators) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
                     if (daysIntoRotation > 46) {
