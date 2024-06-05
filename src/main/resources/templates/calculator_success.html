@@ -19,8 +19,8 @@
   <span>Desk side</span><span th:text="${calculator.deskSide}"></span><br/>
   <span>Letter</span><span th:text="${calculator.letter}"></span><br/>
   <span>map</span><span th:text="${calculator.coverMap}"></span><br/>
-
-
+  <span>Cover maps</span><span th:each="entry : ${allCoverMaps}" th:text="${entry}" />
 </div>
+<p>Back to OT calculator <a href="/calculator">here</a></p>
 </body>
 </html>

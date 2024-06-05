@@ -15,11 +15,11 @@ public class Calculator
     private HashMap<String, ArrayList<String>> coverMap;
 
 
+
     private ArrayList<Vtso> officers;
 
     public Calculator()
     {
-
     }
     /**
      *
@@ -98,7 +98,7 @@ public class Calculator
         }
 
         this.coverMap = coverMap;
-
+        StoreCoverMaps.addCoverMap(coverMap);
         return coverMap;
     }
 
@@ -200,4 +200,6 @@ public class Calculator
     public void setCoverMap(HashMap<String, ArrayList<String>> coverMap) {
         this.coverMap = coverMap;
     }
+
+
 }

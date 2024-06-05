@@ -19,6 +19,7 @@ public class OvertimeShift
     {
         this.deskSideCovered = deskSideCovered;
         officerCovered = officer;
+        this.letter = officer.getLetter();
         this.date = date;
 
 
@@ -310,6 +311,14 @@ public class OvertimeShift
                 }
                 break;
         }
+
+        // populate auxillary informated
+        String dayOrNight = shiftNumber == 1 || shiftNumber == 2 ? "day" : "night";
+        coverList.put("cover for", new ArrayList<String>());
+        coverList.get("cover for").add(deskSideCovered);
+        coverList.get("cover for").add(letter);
+        coverList.get("cover for").add(dayOrNight);
+
         return coverList;
 
     }

@@ -7,25 +7,9 @@
 <body>
 <h1>Calculator Form</h1>
 <form action="#" th:action="@{/calculator}" method="post" th:object="${calculator}">
-    <label>Full name:</label>
-    <input type="text" th:field="*{name}" /><br/>
 
     <label>Date:</label>
     <input type="date" th:field="*{date}" /><br/>
-
-
-
-
-
-    <label>Year</label>
-    <input type="text" th:field="*{year}" /><br/>
-
-    <label>Month</label>
-    <input type="text" th:field="*{month}" /><br/>
-
-    <label>Day</label>
-    <input type="text" th:field="*{day}" /><br/>
-
 
     <label>Desk side:</label>
     <select th:field="*{deskSide}">

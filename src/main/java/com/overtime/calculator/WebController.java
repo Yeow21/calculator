@@ -56,9 +56,11 @@ public class WebController {
         System.out.println("calculator = " + calculator);
         OvertimeShift shift = calculator.getShift();
         HashMap<String, ArrayList<String>> coverMap = calculator.populateCoverMap(shift);
-        System.out.println("MAP = " + coverMap);
+        System.out.println("MAP = " + coverMap + "AllCoverMaps = " + StoreCoverMaps.getAllCoverMaps());
+
 
         model.addAttribute("coverMap", coverMap);
+        model.addAttribute("allCoverMaps", StoreCoverMaps.getAllCoverMaps());
 
 
 
