@@ -19,8 +19,9 @@ public class OvertimeShift
     private Vtso officerCovered;
     private String letter;
     private int shiftNumber;
-    private HashMap<String, ArrayList<String>> coverMap;
-    private String coverMetaData;
+    private ArrayList<String> coverMetaData;
+    private ArrayList<String> officersList = new ArrayList<>();
+    private ArrayList<String> operatorsList = new ArrayList<>();
 
 
     public OvertimeShift(){}
@@ -77,10 +78,7 @@ public class OvertimeShift
                 .filter(v -> v.getDeskSide().equals("officer"))
                 .toList();
 
-        // delete - test
-        for (Vtso officer : dutyOfficers) {
-            System.out.println("1" + officer.getName());
-        }
+
 
         // filer DO's using stream
         List<Vtso> marineOperators = officers
@@ -88,10 +86,6 @@ public class OvertimeShift
                 .filter(v -> v.getDeskSide().equals("operator"))
                 .toList();
 
-        // delete - test
-        for (Vtso operator : marineOperators) {
-            System.out.println("3" + operator.getName());
-        }
 
 
         int otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
@@ -342,13 +336,15 @@ public class OvertimeShift
 
         // populate auxillary informated
         String dayOrNight = shiftNumber == 1 || shiftNumber == 2 ? "day" : "night";
-        coverList.put("cover for", new ArrayList<String>());
-        coverList.get("cover for").add(deskSideCovered);
-        coverList.get("cover for").add(letter);
-        coverList.get("cover for").add(dayOrNight);
-        coverList.get("cover for").add(date.toString());
-        String metaData = String.format("%s: %s %s %s shift", date.toString(), deskSideCovered, letter, dayOrNight);
-        setCoverMap(coverList);
+        ArrayList<String> coverData = new ArrayList<>();
+        coverData.add(date.toString());
+        coverData.add(deskSideCovered);
+        coverData.add(letter);
+        coverData.add(dayOrNight);
+
+        setCoverMetaData(coverData);
+        setOfficersList(coverList.get("officer"));
+        setOperatorsList(coverList.get("operator"));
 
         return coverList;
     }
@@ -389,14 +385,6 @@ public class OvertimeShift
         this.id = id;
     }
 
-    public HashMap<String, ArrayList<String>> getCoverMap() {
-        return coverMap;
-    }
-
-    public void setCoverMap(HashMap<String, ArrayList<String>> coverMap) {
-        this.coverMap = coverMap;
-    }
-
 
     public ArrayList<Vtso> populateOfficers()
     {
@@ -416,4 +404,27 @@ public class OvertimeShift
     }
 
 
+    public ArrayList<String> getOfficersList() {
+        return officersList;
+    }
+
+    public void setOfficersList(ArrayList<String> officersList) {
+        this.officersList = officersList;
+    }
+
+    public ArrayList<String> getOperatorsList() {
+        return operatorsList;
+    }
+
+    public void setOperatorsList(ArrayList<String> operatorsList) {
+        this.operatorsList = operatorsList;
+    }
+
+    public ArrayList<String> getCoverMetaData() {
+        return coverMetaData;
+    }
+
+    public void setCoverMetaData(ArrayList<String> coverMetaData) {
+        this.coverMetaData = coverMetaData;
+    }
 }

@@ -2,7 +2,13 @@ package com.overtime.calculator;
 
 import java.util.*;
 
+import java.util.stream.Collectors;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.hibernate.sql.ast.tree.expression.Over;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
@@ -12,68 +18,76 @@ public class CalculatorController {
 
     private final OvertimeShiftRepository repository;
 
-    CalculatorController(OvertimeShiftRepository repository) {
+    private final OvertimeShiftModelAssembler assembler;
+
+
+
+    CalculatorController(OvertimeShiftRepository repository, OvertimeShiftModelAssembler assembler) {
         this.repository = repository;
+        this.assembler = assembler;
     }
 
-    @GetMapping("/employees/{id}")
+    // single item
+    @GetMapping("/overtime/{id}")
     EntityModel<OvertimeShift> one(@PathVariable Long id) {
 
         OvertimeShift shift = repository.findById(id) //
                 .orElseThrow(() -> new OvertimeShiftNotFoundException(id));
 
-        return EntityModel.of(employee, //
-                linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
-                linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
+        return assembler.toModel(shift);
     }
 
-
-
-    // Aggregate root
-    // tag::get-aggregate-root[]
+    // aggregate get
+    @CrossOrigin
     @GetMapping("/overtime")
-    List<OvertimeShift> all() {
-        return repository.findAll();
+    CollectionModel<EntityModel<OvertimeShift>> all() {
+
+        List<EntityModel<OvertimeShift>> shifts = repository.findAll().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+
+        return CollectionModel.of(shifts, linkTo(methodOn(CalculatorController.class).all()).withSelfRel());
     }
-    // end::get-aggregate-root[]
 
     @PostMapping("/overtime")
-    OvertimeShift newOvertimeShift(@RequestBody OvertimeShift newShift) {
-        return repository.save(newShift);
+    ResponseEntity<?> newShift(@RequestBody OvertimeShift newShift) {
+
+        EntityModel<OvertimeShift> entityModel = assembler.toModel(repository.save(newShift));
+
+        return ResponseEntity //
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                .body(entityModel);
     }
 
-    // Single item
+    @PutMapping("/employees/{id}")
+    ResponseEntity<?> replaceShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
 
-    @GetMapping("/overtime/{id}")
-    OvertimeShift one(@PathVariable Long id) {
-
-        return repository.findById(id)
-                .orElseThrow(() -> new OvertimeShiftNotFoundException(id));
-    }
-    /**
-    @PutMapping("/overtime/{id}")
-    OvertimeShift replaceOvertimeShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
-
-        return repository.findById(id)
-                .map(employee -> {
-                    employee.setName(newEmployee.getName());
-                    employee.setRole(newEmployee.getRole());
-                    return repository.save(employee);
-                })
+        OvertimeShift updatedEmployee = repository.findById(id) //
+                .map(shift -> {
+                    shift.setLetter(newShift.getLetter());
+                    shift.setDate(newShift.getDate());
+                    return repository.save(shift);
+                }) //
                 .orElseGet(() -> {
-                    newEmployee.setId(id);
-                    return repository.save(newEmployee);
+                    newShift.setId(id);
+                    return repository.save(newShift);
                 });
-    }
-     */
 
-    @DeleteMapping("/calculator/{id}")
-    void deleteOvertimeShift(@PathVariable Long id) {
+        EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedEmployee);
+
+        return ResponseEntity //
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                .body(entityModel);
+    }
+
+
+    @DeleteMapping("/overtime/{id}")
+    ResponseEntity<?> deleteShift(@PathVariable Long id) {
+
         repository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
-
-
-
 
 
 
