@@ -1,29 +1,52 @@
 package com.overtime.calculator;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
+@Entity
 public class OvertimeShift
 {
+    private @Id
+    @GeneratedValue long id;
     private LocalDate date;
-    private Vtso officerCovered;
     private String deskSideCovered;
-    private int shiftNumber;
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Vtso officerCovered;
     private String letter;
+    private int shiftNumber;
+    
 
+
+    /**
+     * constructor
+     * @param date date of overtime shift
+     * @param deskSideCovered side of desk being covered - "operator" or "officer"
+     * @param officer the officer object which requires cover
+     */
     public OvertimeShift(LocalDate date, String deskSideCovered, Vtso officer)
     {
+
+        this.date = date;        
         this.deskSideCovered = deskSideCovered;
+
         officerCovered = officer;
         this.letter = officer.getLetter();
-        this.date = date;
 
 
+        this.shiftNumber = getShiftNumberFromOfficer(officer);
+    }
 
+    /**
+     * calculate the number of the shift of the person being covered, 1-4
+     * @param officer
+     * @return
+     */
+    private int getShiftNumberFromOfficer(Vtso officer) {
         // working out the shift number of the person who needs cover
         long daysSinceFirstShift = ChronoUnit.DAYS.between(officer.getFirstShiftDate(), this.getDate());
         System.out.println("daysSinceFirstShift: " + daysSinceFirstShift);
@@ -32,10 +55,13 @@ public class OvertimeShift
         if (daysIntoRotation <= officer.getRotationLengthMinusLeave()) {
             shiftNumber = (int) (daysIntoRotation % 8) + 1;
             System.out.println("shiftNumber = " + shiftNumber);
-        } else {
-            shiftNumber = (int) daysIntoRotation;
         }
+
+        return shiftNumber;
     }
+
+
+
 
     public HashMap<String, ArrayList<String>> calculateOvertimeList(ArrayList<Vtso> officers)
     {
@@ -350,6 +376,14 @@ public class OvertimeShift
 
     public void setLetter(String letter) {
         this.letter = letter;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
     // --------------------------------------------------------------------------------------------------------- //
 

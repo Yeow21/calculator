@@ -1,19 +1,31 @@
 package com.overtime.calculator;
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 /**
  *
  */
+@Entity
 public class Vtso
 {
+    @Id
+    @GeneratedValue long id;
     private String name;
     private String letter; // operator or officer letter
     private LocalDate firstShiftDate;
     private String deskSide; // operator or officer
     private int rotationLength; // in days
 
+
+    public Vtso() {
+    }
     public Vtso(String name, String letter, int monthOfFirstShift, int dayOfFirstShift, String deskSide)
     {
         this.name = name;
