@@ -19,8 +19,11 @@ public class OvertimeShift
     private Vtso officerCovered;
     private String letter;
     private int shiftNumber;
-    
+    private HashMap<String, ArrayList<String>> coverMap;
+    private String coverMetaData;
 
+
+    public OvertimeShift(){}
 
     /**
      * constructor
@@ -33,12 +36,11 @@ public class OvertimeShift
 
         this.date = date;        
         this.deskSideCovered = deskSideCovered;
-
         officerCovered = officer;
         this.letter = officer.getLetter();
-
-
         this.shiftNumber = getShiftNumberFromOfficer(officer);
+
+        calculateOvertimeList(populateOfficers());
     }
 
     /**
@@ -63,7 +65,7 @@ public class OvertimeShift
 
 
 
-    public HashMap<String, ArrayList<String>> calculateOvertimeList(ArrayList<Vtso> officers)
+    public HashMap<String, ArrayList<String>> calculateOvertimeList(ArrayList<Vtso> officers) //
     {
         HashMap<String, ArrayList<String>> coverList = new HashMap<>();
         coverList.put("officer", new ArrayList<String>());
@@ -345,9 +347,10 @@ public class OvertimeShift
         coverList.get("cover for").add(letter);
         coverList.get("cover for").add(dayOrNight);
         coverList.get("cover for").add(date.toString());
+        String metaData = String.format("%s: %s %s %s shift", date.toString(), deskSideCovered, letter, dayOrNight);
+        setCoverMap(coverList);
 
         return coverList;
-
     }
 
     public LocalDate getDate() {
@@ -385,6 +388,32 @@ public class OvertimeShift
     public void setId(long id) {
         this.id = id;
     }
-    // --------------------------------------------------------------------------------------------------------- //
+
+    public HashMap<String, ArrayList<String>> getCoverMap() {
+        return coverMap;
+    }
+
+    public void setCoverMap(HashMap<String, ArrayList<String>> coverMap) {
+        this.coverMap = coverMap;
+    }
+
+
+    public ArrayList<Vtso> populateOfficers()
+    {
+        ArrayList<Vtso> officers = new ArrayList<>();
+        officers.add(new Vtso("Joe", "A", 1, 13, "officer"));
+        officers.add(new Vtso("Jonathan", "B", 1, 19, "officer"));
+        officers.add(new Vtso("Luke", "C", 1, 25, "officer"));
+        officers.add(new Vtso("Fraser", "D", 1, 31, "officer"));
+        officers.add(new Vtso("George", "E", 2, 6, "officer"));
+
+        officers.add(new Vtso("Ben", "A", 2, 19, "operator"));
+        officers.add(new Vtso("Kevin", "B", 1, 20, "operator"));
+        officers.add(new Vtso("Sam", "C", 1, 10, "operator"));
+        officers.add(new Vtso("Iguana", "D", 1, 30, "operator"));
+        officers.add(new Vtso("Chris", "E", 2, 9, "operator"));
+        return officers;
+    }
+
 
 }

@@ -2,13 +2,82 @@ package com.overtime.calculator;
 
 import java.util.*;
 
+import org.hibernate.sql.ast.tree.expression.Over;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
 
-@Controller
-public class WebController {
+@RestController
+public class CalculatorController {
+
+    private final OvertimeShiftRepository repository;
+
+    CalculatorController(OvertimeShiftRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/employees/{id}")
+    EntityModel<OvertimeShift> one(@PathVariable Long id) {
+
+        OvertimeShift shift = repository.findById(id) //
+                .orElseThrow(() -> new OvertimeShiftNotFoundException(id));
+
+        return EntityModel.of(employee, //
+                linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
+                linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
+    }
+
+
+
+    // Aggregate root
+    // tag::get-aggregate-root[]
+    @GetMapping("/overtime")
+    List<OvertimeShift> all() {
+        return repository.findAll();
+    }
+    // end::get-aggregate-root[]
+
+    @PostMapping("/overtime")
+    OvertimeShift newOvertimeShift(@RequestBody OvertimeShift newShift) {
+        return repository.save(newShift);
+    }
+
+    // Single item
+
+    @GetMapping("/overtime/{id}")
+    OvertimeShift one(@PathVariable Long id) {
+
+        return repository.findById(id)
+                .orElseThrow(() -> new OvertimeShiftNotFoundException(id));
+    }
+    /**
+    @PutMapping("/overtime/{id}")
+    OvertimeShift replaceOvertimeShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
+
+        return repository.findById(id)
+                .map(employee -> {
+                    employee.setName(newEmployee.getName());
+                    employee.setRole(newEmployee.getRole());
+                    return repository.save(employee);
+                })
+                .orElseGet(() -> {
+                    newEmployee.setId(id);
+                    return repository.save(newEmployee);
+                });
+    }
+     */
+
+    @DeleteMapping("/calculator/{id}")
+    void deleteOvertimeShift(@PathVariable Long id) {
+        repository.deleteById(id);
+    }
+
+
+
+
+
+
+
 
     @GetMapping("/lol")
     public String lol()
