@@ -318,6 +318,7 @@ public class OvertimeShift
         coverList.get("cover for").add(deskSideCovered);
         coverList.get("cover for").add(letter);
         coverList.get("cover for").add(dayOrNight);
+        coverList.get("cover for").add(date.toString());
 
         return coverList;
 
