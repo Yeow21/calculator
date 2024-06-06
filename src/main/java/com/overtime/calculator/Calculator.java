@@ -3,6 +3,13 @@ package com.overtime.calculator;
 import java.util.*;
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 public class Calculator
 {
     private String name;
@@ -13,44 +20,52 @@ public class Calculator
     private String letter;
     private LocalDate date;
     private HashMap<String, ArrayList<String>> coverMap;
-
-
-
     private ArrayList<Vtso> officers;
+    private int shiftNumber;
 
-    public Calculator()
-    {
+    public Calculator() {
     }
-    /**
-     *
-     * @param year
-     * @param month
-     * @param day
-     * @param deskSide
-     * @param letter
-     */
-    public Calculator(int year, int month, int day, String deskSide, String letter)
+
+
+
+    public Calculator(LocalDate date, String deskSide, String letter)
     {
-        this.year = year;
-        this.month = month;
-        this.day = day;
+
+        // program flow:
+        // first, initialises the instance variables with the details of the shift to be covered.
         this.deskSide = deskSide;
         this.letter = letter;
-        date = LocalDate.of(year, month, day);
-        populateOfficers();
-        OvertimeShift shift = getShift();
-        System.out.println(shift);
-        System.out.println(populateCoverMap(shift));
-        System.out.println("TEST COMPLETED!!!!!!!!!!!!!!!!!!");
+        this.date = date;
+
+
+
+
+        //OvertimeShift shift = getShift();
+        //System.out.println(shift);
+        //System.out.println(populateCoverMap(shift));
+        //System.out.println("TEST COMPLETED!!!!!!!!!!!!!!!!!!");
     }
 
 
-
     /**
-     * 1 -
-     * populate the officers arrayList
+     * The method which needs to be run to return the OvertimeShift object which will be represented on the web page
      * @return
      */
+    public OvertimeShift getOvertimeShift()
+    {
+        // creates the list of officers and operators
+        populateOfficers();
+
+        // get officer object which is used to work out which shiftNumber is needed
+        Vtso officerToBeCovered = getOfficerToBeCovered();
+
+        // set the shift number to use to calculate cover list
+        this.shiftNumber = getShiftNumberFromOfficer(officerToBeCovered);
+
+        // Return the OvertimeShift object after running it through the calculator method
+        return calculateOvertimeList(officers);
+    }
+
     public void populateOfficers()
     {
         officers = new ArrayList<>();
@@ -72,35 +87,351 @@ public class Calculator
      * Calculate officer etc that needs cover and return the shift object
      * @return OvertimeShift object if successful, otherwise return null
      */
-    public OvertimeShift getShift()
+    public Vtso getOfficerToBeCovered()
     {
-        populateOfficers();
         for (Vtso officer : officers) {
             if (deskSide.equals(officer.getDeskSide()) && letter.equals(officer.getLetter())) {
-                return new OvertimeShift(date, deskSide, officer);
+                return officer;
             }
         }
         return null;
     }
 
-    /**
-     * Once shift object initialised, call this to return the cover map
-     * @param shift the shift object which has been initialised with the details of the shift to be covered.
-     * @return the completed map with order of cover
-     */
-    public HashMap<String, ArrayList<String>> populateCoverMap(OvertimeShift shift)
-    {
-        HashMap<String, ArrayList<String>> coverMap = shift.calculateOvertimeList(officers);
 
-        for (String string : coverMap.keySet()) {
-            System.out.print(string);
-            System.out.println(coverMap.get(string));
+
+    /**
+     * calculate the number of the shift of the person being covered, 1-4
+     * @param officer
+     * @return
+     */
+    private int getShiftNumberFromOfficer(Vtso officer) {
+        int shiftNumber = 0;
+
+        // working out the shift number of the person who needs cover
+        long daysSinceFirstShift = ChronoUnit.DAYS.between(officer.getFirstShiftDate(), this.getDate());
+        System.out.println("daysSinceFirstShift: " + daysSinceFirstShift);
+        long daysIntoRotation = daysSinceFirstShift % officer.getRotationLength();
+        System.out.println("daysIntoRotation: " + daysIntoRotation);
+        if (daysIntoRotation <= officer.getRotationLengthMinusLeave()) {
+            shiftNumber = (int) (daysIntoRotation % 8) + 1;
+            System.out.println("shiftNumber = " + shiftNumber);
         }
 
-        this.coverMap = coverMap;
-        StoreCoverMaps.addCoverMap(coverMap);
-        return coverMap;
+        return shiftNumber;
     }
+
+
+    public OvertimeShift calculateOvertimeList(ArrayList<Vtso> officers) //
+    {
+        HashMap<String, ArrayList<String>> coverList = new HashMap<>();
+        coverList.put("officer", new ArrayList<String>());
+        coverList.put("operator", new ArrayList<String>());
+
+        // filter DO's using stream
+        List<Vtso> dutyOfficers = officers
+                .stream()
+                .filter(v -> v.getDeskSide().equals("officer"))
+                .toList();
+
+
+
+        // filer DO's using stream
+        List<Vtso> marineOperators = officers
+                .stream()
+                .filter(v -> v.getDeskSide().equals("operator"))
+                .toList();
+
+        int otherShiftNumber = 0;
+        System.out.println("shiftNumber = " + shiftNumber + " && otherShiftNumber = " + otherShiftNumber);
+        otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
+        int officerShiftNumber = deskSide.equals("officer") ? shiftNumber : otherShiftNumber;
+        System.out.println("Officer shift number = " + officerShiftNumber);
+        int operatorShiftNumber = deskSide.equals("operator") ? shiftNumber : otherShiftNumber;
+        System.out.println("Operator shift number = " + operatorShiftNumber);
+
+        // calculate officers for cover
+        switch (officerShiftNumber) {
+            case 1:
+
+                // get first person for cover
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 7) {
+                        coverList.get("officer").add(officer.getLetter());
+                    }
+                }
+
+                // get 2nd person for cover (on 10 off)
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 26) {
+                        coverList.get("officer").add(officer.getLetter() + "(10)");
+                    }
+                }
+
+                // get 3rd person for cover (on 10 off)
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 9 && daysIntoRotation < 26) {
+                        coverList.get("officer").add(officer.getLetter() + "(10)");
+                    }
+                }
+                break;
+
+            case 2:
+                // get first person for cover
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 6) {
+                        coverList.get("officer").add(officer.getLetter());
+                    }
+                }
+
+                // get 2nd person for cover
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    System.out.println(daysIntoRotation);
+                    if (daysIntoRotation == 8) {
+                        coverList.get("officer").add(officer.getLetter());
+                        System.out.println("This one fired");
+                        System.out.println(officer.getLetter());
+                    }
+                }
+
+                // get 2nd person for cover (on 10 off)
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 26) {
+                        coverList.get("officer").add(officer.getLetter()+ "(10)");
+                        System.out.println("Then This one fired");
+                        System.out.println(officer.getLetter() );
+                    }
+                }
+
+                // get 3rd person for cover (on 10 off)
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 9 && daysIntoRotation < 26) {
+                        coverList.get("officer").add(officer.getLetter() + "(10)");
+                        System.out.println("now This one fired");
+                        System.out.println(officer.getLetter());
+                    }
+                }
+                break;
+
+            case 3:
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 7) {
+                        coverList.get("officer").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 5) {
+                        coverList.get("officer").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 21 && daysIntoRotation <=25) {
+                        coverList.get("officer").add(officer.getLetter()+ "(10)");
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 25) {
+                        coverList.get("officer").add(officer.getLetter()+ "(10)");
+                    }
+                }
+                break;
+
+            case 4:
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 6) {
+                        coverList.get("officer").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 21 && daysIntoRotation <=25) {
+                        coverList.get("officer").add(officer.getLetter()+ "(10)");
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 25) {
+                        coverList.get("officer").add(officer.getLetter()+ "(10)");
+                    }
+                }
+                break;
+            default:
+                System.out.println("No successful case!");
+                break;
+        }
+
+
+
+        // calculate operators for cover
+        switch (operatorShiftNumber) {
+            case 1:
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 7) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                // change to commit
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 38 && daysIntoRotation <= 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+                break;
+            case 2:
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 6) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 8) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 38 && daysIntoRotation <= 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+                break;
+
+            case 3:
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 7) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 5) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 46 && daysIntoRotation < 50) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 37 && daysIntoRotation <= 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+
+                break;
+
+            case 4:
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 6) {
+                        coverList.get("operator").add(officer.getLetter());
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation > 46 && daysIntoRotation < 50) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation >= 37 && daysIntoRotation <= 46) {
+                        coverList.get("operator").add(officer.getLetter() + "(14)");
+                    }
+                }
+                break;
+        }
+
+        // populate auxillary informated
+        String dayOrNight = shiftNumber == 1 || shiftNumber == 2 ? "day" : "night";
+        ArrayList<String> coverData = new ArrayList<>();
+        coverData.add(date.toString());
+        coverData.add(deskSide);
+        coverData.add(letter);
+        coverData.add(dayOrNight);
+
+        ArrayList<String>coverMetaData = coverData;
+        ArrayList<String>officerList = coverList.get("officer");
+        ArrayList<String>operatorList = coverList.get("operator");
+
+        OvertimeShift newShift = new OvertimeShift(date, deskSide, letter, officerList, operatorList);
+        System.out.printf(
+                "\n DEBUG: Date: %s, Desk Side: %s, Letter: %s, Officer List: %s, Operator List: %s\n",
+                date.toString(), deskSide, letter, officerList, operatorList
+        );
+        return newShift;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -202,4 +533,11 @@ public class Calculator
     }
 
 
+    public void setShiftNumber(int shiftNumber) {
+        this.shiftNumber = shiftNumber;
+    }
+
+    public int getShiftNumber() {
+        return shiftNumber;
+    }
 }

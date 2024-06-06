@@ -6,67 +6,224 @@
     <title>Overtime Shifts</title>
     <style>
         table {
-            border-collapse: collapse;
             width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
         }
         th, td {
-            border: 1px solid #dddddd;
+            padding: 15px;
             text-align: left;
-            padding: 8px;
         }
         th {
             background-color: #f2f2f2;
         }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+    <h1>Overtime Shifts</h1>
 
-<h2>Overtime Shifts</h2>
+    <!-- Add Overtime Shift Form -->
+    <form id="overtime-form" method="POST">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
 
-<div id="overtimeTable"></div>
+        <label for="deskSide">Desk Side:</label>
+        <select id="deskSide" name="deskSide" required>
+            <option value="operator">Operator</option>
+            <option value="officer">Officer</option>
+        </select>
 
-<script>
-    fetch('http://localhost:8081/overtime')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            const shifts = data._embedded.overtimeShiftList;
-            const table = document.createElement('table');
+        <label for="letter">Letter:</label>
+        <select id="letter" name="letter" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+        </select>
 
-            // Create table header
-            const headerRow = document.createElement('tr');
-            for (const key in shifts[0]) {
-                if (key !== '_links') {
-                    const th = document.createElement('th');
-                    th.textContent = key;
-                    headerRow.appendChild(th);
-                }
-            }
-            table.appendChild(headerRow);
+        <button type="submit">Add Overtime Shift</button>
+    </form>
 
-            // Create table rows
-            shifts.forEach(shift => {
-                const row = document.createElement('tr');
-                for (const key in shift) {
-                    if (key !== '_links') {
-                        const td = document.createElement('td');
-                        if (typeof shift[key] === 'object') {
-                            // Convert object to string for display
-                            const objString = JSON.stringify(shift[key]);
-                            td.textContent = objString;
-                        } else {
-                            td.textContent = shift[key];
-                        }
-                        row.appendChild(td);
+    <!-- Delete Overtime Shift Form -->
+    <form id="delete-overtime-form" method="DELETE">
+        <label for="deleteId">ID:</label>
+        <input type="number" id="deleteId" name="deleteId" required>
+
+        <button type="submit">Delete Overtime Shift</button>
+    </form>
+
+    <!-- Operator Table -->
+    <h2>Operator Shifts</h2>
+    <table id="operator-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Desk Side</th>
+                <th>Letter</th>
+                <th>Operator List</th>
+                <th>Officer List</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <!-- Officer Table -->
+    <h2>Officer Shifts</h2>
+    <table id="officer-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Desk Side</th>
+                <th>Letter</th>
+                <th>Officer List</th>
+                <th>Operator List</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchOvertimeShifts() {
+            try {
+                const response = await fetch('http://localhost:8081/overtime');
+                const data = await response.json();
+
+                const overtimeShifts = data._embedded.overtimeShiftList;
+
+                // Clear existing table rows
+                const operatorTableBody = document.querySelector('#operator-table tbody');
+                const officerTableBody = document.querySelector('#officer-table tbody');
+                operatorTableBody.innerHTML = '';
+                officerTableBody.innerHTML = '';
+
+                overtimeShifts.forEach(shift => {
+                    const row = document.createElement('tr');
+
+                    const idCell = document.createElement('td');
+                    idCell.textContent = shift.id;
+                    row.appendChild(idCell);
+
+                    const dateCell = document.createElement('td');
+                    const date = new Date(shift.date);
+                    const formattedDate = `${String(date.getDate()).padStart(2, '0')} ${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getFullYear()).slice(-2)}`;
+                    dateCell.textContent = formattedDate;
+                    row.appendChild(dateCell);
+
+                    const deskSideCell = document.createElement('td');
+                    deskSideCell.textContent = shift.deskSide;
+                    row.appendChild(deskSideCell);
+
+                    const letterCell = document.createElement('td');
+                    letterCell.textContent = shift.letter;
+                    row.appendChild(letterCell);
+
+                    if (shift.deskSide === 'operator') {
+                        const operatorsListCell = document.createElement('td');
+                        operatorsListCell.textContent = shift.operatorsList.join(', ');
+                        row.appendChild(operatorsListCell);
+
+                        const officersListCell = document.createElement('td');
+                        officersListCell.textContent = shift.officersList.join(', ');
+                        row.appendChild(officersListCell);
+
+                        operatorTableBody.appendChild(row);
+                    } else if (shift.deskSide === 'officer') {
+                        const officersListCell = document.createElement('td');
+                        officersListCell.textContent = shift.officersList.join(', ');
+                        row.appendChild(officersListCell);
+
+                        const operatorsListCell = document.createElement('td');
+                        operatorsListCell.textContent = shift.operatorsList.join(', ');
+                        row.appendChild(operatorsListCell);
+
+                        officerTableBody.appendChild(row);
                     }
+                });
+            } catch (error) {
+                console.error('Error fetching overtime shifts:', error);
+            }
+        }
+
+        async function addOvertimeShift(event) {
+            event.preventDefault();
+            
+            const date = document.querySelector('#date').value;
+            const deskSide = document.querySelector('#deskSide').value;
+            const letter = document.querySelector('#letter').value;
+
+            const newShift = {
+                date: date,
+                deskSide: deskSide,
+                letter: letter,
+                officersList: [], // Assuming empty lists for now
+                operatorsList: []
+            };
+
+            try {
+                const response = await fetch('http://localhost:8081/overtime', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newShift)
+                });
+
+                if (response.ok) {
+                    fetchOvertimeShifts(); // Refresh the tables
+                    document.querySelector('#overtime-form').reset(); // Clear form fields
+                } else {
+                    console.error('Error adding overtime shift:', response.statusText);
                 }
-                table.appendChild(row);
-            });
+            } catch (error) {
+                console.error('Error adding overtime shift:', error);
+            }
+        }
 
-            document.getElementById('overtimeTable').appendChild(table);
-        })
-        .catch(error => console.error('Error fetching overtime shifts:', error));
-</script>
+        async function deleteOvertimeShift(event) {
+            event.preventDefault();
 
+            const deleteId = document.querySelector('#deleteId').value;
+
+            try {
+                const response = await fetch(`http://localhost:8081/overtime/${deleteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    fetchOvertimeShifts(); // Refresh the tables
+                    document.querySelector('#delete-overtime-form').reset(); // Clear form fields
+                } else {
+                    console.error('Error deleting overtime shift:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error deleting overtime shift:', error);
+            }
+        }
+
+        document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
+        document.querySelector('#delete-overtime-form').addEventListener('submit', deleteOvertimeShift);
+
+        fetchOvertimeShifts();
+    </script>
 </body>
 </html>

@@ -16,24 +16,33 @@ class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(OvertimeShiftRepository repository) {
 
-        return args -> {
-            log.info("Preloading " + repository.save(new OvertimeShift
-                    (LocalDate.of(2024, 6, 5),
-                            "operator",
-                            new Vtso("Chris",
-                                    "E",
-                                    2,
-                                    9,
-                                    "operator") )));
+        OvertimeShift shiftOne = new Calculator(
+                LocalDate.of(2024, 6, 4),
+                "operator",
+                "E")
+                .getOvertimeShift();
 
-            log.info("Preloading " + repository.save(new OvertimeShift
-                    (LocalDate.of(2024, 6, 4),
-                            "operator",
-                            new Vtso("Chris",
-                                    "E",
-                                    2,
-                                    9,
-                                    "operator") )));
+        OvertimeShift shiftTwo = new Calculator(
+                LocalDate.of(2024, 6, 5),
+                "operator",
+                "E")
+                .getOvertimeShift();
+
+        OvertimeShift shiftThree = new Calculator(
+                LocalDate.of(2024, 6, 6),
+                "officer",
+                "E")
+                .getOvertimeShift();
+
+
+
+
+        return args -> {
+            log.info("Preloading " + repository.save(shiftOne));
+
+            log.info("Preloading {}", repository.save(shiftTwo));
+
+            log.info("Preloading {}", repository.save(shiftThree));
         };
     }
 }

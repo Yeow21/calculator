@@ -50,7 +50,9 @@ public class CalculatorController {
     }
 
     @PostMapping("/overtime") // Maps HTTP POST requests to /overtime to this method.
-    ResponseEntity<?> newShift(@RequestBody OvertimeShift newShift) { // Indicates that the request body should be deserialized into an OvertimeShift object.
+    ResponseEntity<?> newShift(@RequestBody Calculator newCalculator) { // Indicates that the request body should be deserialized into an OvertimeShift object.
+
+        OvertimeShift newShift = newCalculator.getOvertimeShift();
 
         // Saves the new overtime shift to the repository and converts it to an EntityModel.
         EntityModel<OvertimeShift> entityModel = assembler.toModel(repository.save(newShift));
@@ -62,7 +64,7 @@ public class CalculatorController {
     }
 
 
-    @PutMapping("/employees/{id}")
+    @PutMapping("/overtime/{id}")
     ResponseEntity<?> replaceShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
 
         OvertimeShift updatedEmployee = repository.findById(id) //
@@ -86,7 +88,7 @@ public class CalculatorController {
 
     @DeleteMapping("/overtime/{id}")
     ResponseEntity<?> deleteShift(@PathVariable Long id) {
-
+        System.out.println("CALLED!");
         repository.deleteById(id);
 
         return ResponseEntity.noContent().build();
@@ -140,12 +142,12 @@ public class CalculatorController {
 
 
         System.out.println("calculator = " + calculator);
-        OvertimeShift shift = calculator.getShift();
-        HashMap<String, ArrayList<String>> coverMap = calculator.populateCoverMap(shift);
-        System.out.println("MAP = " + coverMap + "AllCoverMaps = " + StoreCoverMaps.getAllCoverMaps());
+        // OvertimeShift shift = calculator.getShift();
+        //HashMap<String, ArrayList<String>> coverMap = calculator.populateCoverMap(shift);
+        //System.out.println("MAP = " + coverMap + "AllCoverMaps = " + StoreCoverMaps.getAllCoverMaps());
 
 
-        model.addAttribute("coverMap", coverMap);
+        //model.addAttribute("coverMap", coverMap);
         model.addAttribute("allCoverMaps", StoreCoverMaps.getAllCoverMaps());
 
 
