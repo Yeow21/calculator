@@ -49,15 +49,18 @@ public class CalculatorController {
         return CollectionModel.of(shifts, linkTo(methodOn(CalculatorController.class).all()).withSelfRel());
     }
 
-    @PostMapping("/overtime")
-    ResponseEntity<?> newShift(@RequestBody OvertimeShift newShift) {
+    @PostMapping("/overtime") // Maps HTTP POST requests to /overtime to this method.
+    ResponseEntity<?> newShift(@RequestBody OvertimeShift newShift) { // Indicates that the request body should be deserialized into an OvertimeShift object.
 
+        // Saves the new overtime shift to the repository and converts it to an EntityModel.
         EntityModel<OvertimeShift> entityModel = assembler.toModel(repository.save(newShift));
 
-        return ResponseEntity //
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-                .body(entityModel);
+        // Returns a ResponseEntity with a created status (201) and the URI of the new resource in the Location header.
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) // Sets the Location header to the URI of the newly created resource.
+                .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
     }
+
 
     @PutMapping("/employees/{id}")
     ResponseEntity<?> replaceShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
