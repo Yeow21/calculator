@@ -63,7 +63,25 @@ public class CalculatorController {
                 .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
     }
 
+    @PutMapping("/overtime/{id}")
+    ResponseEntity<?> updateCoverList(@RequestBody Map<String, String> newShift, @PathVariable long id) {
+        String deskSide = newShift.get("deskside");
+        String letter = newShift.get("letter");
 
+        OvertimeShift updatedShift = repository.findById(id)
+                .map(shift -> {
+                    shift.removeLetterFromCoverList(letter, deskSide);
+                    return repository.save(shift);
+                }).orElseThrow(() -> new OvertimeShiftNotFoundException(id));
+
+        EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedShift);
+
+        return ResponseEntity //
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                .body(entityModel);
+    }
+
+    /**
     @PutMapping("/overtime/{id}")
     ResponseEntity<?> replaceShift(@RequestBody OvertimeShift newShift, @PathVariable Long id) {
 
@@ -84,6 +102,7 @@ public class CalculatorController {
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
                 .body(entityModel);
     }
+     */
 
 
     @DeleteMapping("/overtime/{id}")

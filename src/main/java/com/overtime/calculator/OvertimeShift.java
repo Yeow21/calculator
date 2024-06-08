@@ -105,4 +105,13 @@ public class OvertimeShift
     public void setDeskSide(String deskSide) {
         this.deskSide = deskSide;
     }
+
+    public void removeLetterFromCoverList(String letter, String deskSide)
+    {
+        if (deskSide.equals("officer")) {
+            System.out.println(officersList.remove(letter));
+        } else if (deskSide.equals("operator")) {
+            System.out.println(operatorsList.remove(letter));
+        }
+    }
 }

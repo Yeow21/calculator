@@ -74,6 +74,7 @@
                 <th>Letter</th>
                 <th>Operator List</th>
                 <th>Officer List</th>
+                <th>Confirm Availability</th>
             </tr>
         </thead>
         <tbody>
@@ -155,14 +156,22 @@
 
                         officerTableBody.appendChild(row);
                     }
-                });
+
+                    const confirmListCell = document.createElement('td');
+                    confirmListCell.appendChild(addSelectList(shift.officersList, shift.operatorsList))
+                    row.appendChild(confirmListCell);
+                    });
+
+
+
+
             } catch (error) {
                 console.error('Error fetching overtime shifts:', error);
             }
         }
 
         async function addOvertimeShift(event) {
-            event.preventDefault();
+            // event.preventDefault();
             
             const date = document.querySelector('#date').value;
             const deskSide = document.querySelector('#deskSide').value;
@@ -220,10 +229,128 @@
             }
         }
 
+
+
+
+        async function updateCoverList(event) {
+            event.preventDefault();
+            
+            const date = document.querySelector('#date').value;
+            const deskSide = document.querySelector('#deskSide').value;
+            const letter = document.querySelector('#letter').value;
+
+            const newShift = {
+                date: date,
+                deskSide: deskSide,
+                letter: letter,
+                officersList: [], // Assuming empty lists for now
+                operatorsList: []
+            };
+
+            try {
+                const response = await fetch('http://localhost:8082/overtime', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newShift)
+                });
+
+                if (response.ok) {
+                    fetchOvertimeShifts(); // Refresh the tables
+                    document.querySelector('#overtime-form').reset(); // Clear form fields
+                } else {
+                    console.error('Error adding overtime shift:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error adding overtime shift:', error);
+            }
+        }
+        
+
         document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
         document.querySelector('#delete-overtime-form').addEventListener('submit', deleteOvertimeShift);
+        // document.querySelector('#update-overtime-shift').addEventListener('submit', updateOvertimeShift);
 
         fetchOvertimeShifts();
-    </script>
+
+        function addSelectList(operatorShiftList, officerShiftList) {
+            // Create form element
+            const form = document.createElement('form');
+            form.method = "POST";
+            form.id = "update-overtime-shift";
+
+            // Create select element for operator/officer
+            const roleSelect = document.createElement('select');
+            roleSelect.name = 'roleSelect';
+            roleSelect.id = 'roleSelect';
+
+            const operatorOption = document.createElement('option');
+            operatorOption.value = 'operator';
+            operatorOption.textContent = 'Operator';
+            roleSelect.appendChild(operatorOption);
+
+            const officerOption = document.createElement('option');
+            officerOption.value = 'officer';
+            officerOption.textContent = 'Officer';
+            roleSelect.appendChild(officerOption);
+
+            // Append role select element to the form
+            form.appendChild(roleSelect);
+
+            // Create and append the letterSelect element to the form
+            const letterSelect = document.createElement('select');
+            form.appendChild(letterSelect);
+
+            // Event listener to handle role select changes
+            roleSelect.addEventListener('change', function() {
+                letterSelect.innerHTML = '';
+
+                if (roleSelect.value === 'operator') {
+                    letterSelect.name = 'operatorsList';
+                    letterSelect.id = 'operatorsList';
+
+                    operatorShiftList.forEach(function(item) {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        letterSelect.appendChild(option);
+                    });
+                } else if (roleSelect.value === 'officer') {
+                    letterSelect.name = 'officersList';
+                    letterSelect.id = 'officersList';
+
+                    officerShiftList.forEach(function(item) {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        letterSelect.appendChild(option);
+                    });
+                }
+            });
+
+            const confirmButton = document.createElement('button');
+            confirmButton.type = 'submit';
+            confirmButton.name = 'confirm';
+            confirmButton.id = 'confirmButton';
+            confirmButton.value = 'confirm';
+            confirmButton.textContent='Confirm';
+            form.appendChild(confirmButton);
+
+            const rejectButton = document.createElement('button');
+            rejectButton.type = 'submit';
+            rejectButton.name = 'confirm';
+            rejectButton.id = 'rejectButton';
+            rejectButton.value = 'reject';
+            rejectButton.textContent = 'Reject'; // Add text content
+            form.appendChild(rejectButton);
+
+            return form;
+}
+
+
+
+
+   </script>
 </body>
 </html>
