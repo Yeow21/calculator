@@ -51,7 +51,7 @@ public class CalculatorController {
 
     @PostMapping("/overtime") // Maps HTTP POST requests to /overtime to this method.
     ResponseEntity<?> newShift(@RequestBody Calculator newCalculator) { // Indicates that the request body should be deserialized into an OvertimeShift object.
-
+        
         OvertimeShift newShift = newCalculator.getOvertimeShift();
 
         // Saves the new overtime shift to the repository and converts it to an EntityModel.
@@ -61,6 +61,7 @@ public class CalculatorController {
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) // Sets the Location header to the URI of the newly created resource.
                 .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
+                .System.out.println("Sent!");
     }
 
     @PutMapping("/overtime/{id}")
