@@ -16,6 +16,8 @@ public class OvertimeShift
     private ArrayList<String> coverMetaData;
     private ArrayList<String> officersList = new ArrayList<>();
     private ArrayList<String> operatorsList = new ArrayList<>();
+    private ArrayList<String> removedOperators = new ArrayList<>();
+    private ArrayList<String> removedOfficers = new ArrayList<>();
 
 
     public OvertimeShift(){}
@@ -110,8 +112,26 @@ public class OvertimeShift
     {
         if (deskSide.equals("officer")) {
             System.out.println(officersList.remove(letter));
+            System.out.println(removedOfficers.add(letter));
         } else if (deskSide.equals("operator")) {
             System.out.println(operatorsList.remove(letter));
+            System.out.println(removedOperators.add(letter));
         }
+    }
+
+    public ArrayList<String> getRemovedOperators() {
+        return removedOperators;
+    }
+
+    public void setRemovedOperators(ArrayList<String> removedOperators) {
+        this.removedOperators = removedOperators;
+    }
+
+    public ArrayList<String> getRemovedOfficers() {
+        return removedOfficers;
+    }
+
+    public void setRemovedOfficers(ArrayList<String> removedOfficers) {
+        this.removedOfficers = removedOfficers;
     }
 }

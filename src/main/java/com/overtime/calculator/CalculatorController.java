@@ -61,13 +61,17 @@ public class CalculatorController {
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) // Sets the Location header to the URI of the newly created resource.
                 .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
-                .System.out.println("Sent!");
+
     }
 
-    @PutMapping("/overtime/{id}")
-    ResponseEntity<?> updateCoverList(@RequestBody Map<String, String> newShift, @PathVariable long id) {
-        String deskSide = newShift.get("deskside");
-        String letter = newShift.get("letter");
+    @PostMapping("/overtime/update/{id}")
+    ResponseEntity<?> updateCoverList(@RequestBody Map<String, String> updateShift, @PathVariable Long id) {
+        System.out.println("HI!");
+        System.out.println(updateShift);
+
+        String letter = updateShift.get("letter");
+        String deskSide = updateShift.get("deskSide");
+        System.out.println(deskSide +  letter);
 
         OvertimeShift updatedShift = repository.findById(id)
                 .map(shift -> {
