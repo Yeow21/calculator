@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -13,16 +14,22 @@ import java.time.temporal.ChronoUnit;
  *
  */
 @Entity
-public class Vtso
+public class Vtso implements Serializable
 {
+    private static final long serialVersionUID = 1L; // Added serialVersionUID
     @Id
     @GeneratedValue long id;
     private String name;
     private String letter; // operator or officer letter
     private LocalDate firstShiftDate;
     private String deskSide; // operator or officer
-    private int rotationLength; // in days
-
+    private int rotationLength;
+    private boolean isOnTimeOff;
+    private int timeOffLength;
+    private int confirmedCover;
+    private int rejectedCover;
+    private boolean coverConfirmed;
+    private boolean coverRejected;
 
     public Vtso() {
     }
@@ -105,5 +112,59 @@ public class Vtso
         } else {
             return (int) daysIntoRotation + 1;
         }
+    }
+
+    public boolean isOnTimeOff() {
+        return isOnTimeOff;
+    }
+
+    public void setOnTimeOff(boolean onTimeOff) {
+        isOnTimeOff = onTimeOff;
+    }
+
+    public int getTimeOffLength() {
+        return timeOffLength;
+    }
+
+    public void setTimeOffLength(int timeOffLength) {
+        this.timeOffLength = timeOffLength;
+    }
+
+    public void timeOff()
+    {
+        setOnTimeOff(true);
+        setTimeOffLength(deskSide.equals("officer") ? 10 : 14);
+    }
+
+    public int getConfirmedCover() {
+        return confirmedCover;
+    }
+
+    public void setConfirmedCover(int confirmedCover) {
+        this.confirmedCover = confirmedCover;
+    }
+
+    public int getRejectedCover() {
+        return rejectedCover;
+    }
+
+    public void setRejectedCover(int rejectedCover) {
+        this.rejectedCover = rejectedCover;
+    }
+
+    public boolean isCoverConfirmed() {
+        return coverConfirmed;
+    }
+
+    public void setCoverConfirmed(boolean coverConfirmed) {
+        this.coverConfirmed = coverConfirmed;
+    }
+
+    public boolean isCoverRejected() {
+        return coverRejected;
+    }
+
+    public void setCoverRejected(boolean coverRejected) {
+        this.coverRejected = coverRejected;
     }
 }

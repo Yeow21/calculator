@@ -73,17 +73,35 @@ public class CalculatorController {
         String deskSide = updateShift.get("deskSide");
         System.out.println(deskSide +  letter);
 
-        OvertimeShift updatedShift = repository.findById(id)
-                .map(shift -> {
-                    shift.removeLetterFromCoverList(letter, deskSide);
-                    return repository.save(shift);
-                }).orElseThrow(() -> new OvertimeShiftNotFoundException(id));
+        if (updateShift.get("submitter").equals("rejectButton")) {
+            OvertimeShift updatedShift = repository.findById(id)
+                    .map(shift -> {
+                        shift.rejectOfficer(letter, deskSide);
+                        return repository.save(shift);
+                    }).orElseThrow(() -> new OvertimeShiftNotFoundException(id));
 
-        EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedShift);
+            EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedShift);
+            System.out.println(entityModel);
 
-        return ResponseEntity //
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-                .body(entityModel);
+            return ResponseEntity //
+                    .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                    .body(entityModel);
+        }
+
+        if (updateShift.get("submitter").equals("confirmButton")) {
+            OvertimeShift updatedShift = repository.findById(id)
+                    .map(shift -> {
+                        System.out.println(shift.confirmCover(letter, deskSide));
+                        shift.setShiftConfirmed();
+                        return repository.save(shift);
+                    }).orElseThrow(() -> new OvertimeShiftNotFoundException(id));
+            EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedShift);
+
+            return ResponseEntity //
+                    .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+                    .body(entityModel);
+        }
+        return null;
     }
 
     /**
