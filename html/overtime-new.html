@@ -4,36 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overtime Shifts</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 15px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label, input, select {
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .rejected {
-            color: red;
-            font-weight: bold;
-        }
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    
 </head>
 <body>
     <h1>Overtime Shifts</h1>
@@ -106,94 +78,120 @@
             <!-- Data will be populated here -->
         </tbody>
     </table>
-
     <script>
+
+        function createContainer(operator) {
+            const operatorContainer = document.createElement('span');
+            operatorContainer.textContent = operator.letter;
+            if (operator.coverRejected) {
+                
+                operatorContainer.classList.add('rejected');
+            }
+
+            if (operator.coverConfirmed) { 
+                operatorContainer.classList.add('confirmed');
+            }
+
+            return operatorContainer;
+        }
+        function sortShiftsByDate(shifts) {
+            return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
         async function fetchOvertimeShifts() {
             try {
                 const response = await fetch('http://localhost:8082/overtime');
                 const data = await response.json();
-                console.log(data);
-
-                const overtimeShifts = data._embedded.overtimeShiftList;
-
+    
+                let overtimeShifts = data._embedded.overtimeShiftList;
+    
                 // Clear existing table rows
                 const operatorTableBody = document.querySelector('#operator-table tbody');
                 const officerTableBody = document.querySelector('#officer-table tbody');
                 operatorTableBody.innerHTML = '';
                 officerTableBody.innerHTML = '';
-
+                overtimeShifts = sortShiftsByDate(overtimeShifts);
                 overtimeShifts.forEach(shift => {
                     console.log(shift);
                     const row = document.createElement('tr');
-
+    
                     const idCell = document.createElement('td');
                     idCell.textContent = shift.id;
                     row.appendChild(idCell);
-
+    
                     const dateCell = document.createElement('td');
-                    const date = new Date(shift.date);
-                    const formattedDate = `${String(date.getDate()).padStart(2, '0')} ${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getFullYear()).slice(-2)}`;
-                    dateCell.textContent = formattedDate;
+                    dateCell.textContent = shift.date;
                     row.appendChild(dateCell);
-
+    
                     const deskSideCell = document.createElement('td');
                     deskSideCell.textContent = shift.deskSide;
                     row.appendChild(deskSideCell);
-
+    
                     const letterCell = document.createElement('td');
                     letterCell.textContent = shift.letter;
                     row.appendChild(letterCell);
                     
+
+                    const operatorsListCell = document.createElement('td');
+                    const officersListCell = document.createElement('td');
                     
-                    if (shift.deskSide === 'operator') {
-                        const operatorsListCell = document.createElement('td');
-                        operatorsListCell.textContent = shift.operatorsList.join(', ');
-                        if ()
-                        row.appendChild(operatorsListCell);""
-
-                        const officersListCell = document.createElement('td');
-                        officersListCell.textContent = shift.officersList.join(', ');
-                        row.appendChild(officersListCell);
-
-                        operatorTableBody.appendChild(row);
-
-                    } else if (shift.deskSide === 'officer') {
-                        const officersListCell = document.createElement('td');
-                        officersListCell.textContent = shift.officersList.join(', ');
-                        row.appendChild(officersListCell);
-
-                        const operatorsListCell = document.createElement('td');
-                        operatorsListCell.textContent = shift.operatorsList.join(', ');
-                        row.appendChild(operatorsListCell);""
-
-                        officerTableBody.appendChild(row);
+                    // adding operators ---------------------------------------------------------
+                    shift.operatorList.forEach(operator => {
+                        operatorsListCell.appendChild(createContainer(operator));
+                        operatorsListCell.appendChild(document.createTextNode(', '));
+                    });
+                    if (operatorsListCell.lastChild) {
+                    operatorsListCell.removeChild(operatorsListCell.lastChild);
                     }
-
+                    
+                    // adding officers ------------------------------------------------------------
+                    shift.officerList.forEach(officer => {
+                        officersListCell.appendChild(createContainer(officer));
+                        officersListCell.appendChild(document.createTextNode(', '))
+                    })
+                    if (officersListCell.lastChild) {
+                        officersListCell.removeChild(officersListCell.lastChild);
+                    }
+                    
+                    // add each container to the row ----------------------------------------------
+                    if (shift.deskSide === 'operator') {
+                        console.log("got here");
+                        row.appendChild(operatorsListCell);
+                        row.appendChild(officersListCell);
+                        operatorTableBody.appendChild(row);
+                    }
+                    if (shift.deskSide === 'officer') {
+                        console.log("or got here");
+                        row.appendChild(officersListCell);
+                        row.appendChild(operatorsListCell); 
+                        officerTableBody.appendChild(row);                 
+                    }
+                    
+                    // add the confirm availability cell functionality
                     const confirmListCell = document.createElement('td');
-                    confirmListCell.appendChild(addSelectList(shift.operatorsList, shift.officersList, shift.id))
+                    confirmListCell.appendChild(addConfirmAvailabilityForm(shift.operatorList, shift.officerList, shift.id))
                     row.appendChild(confirmListCell);
-                    document.querySelector('#update-overtime-shift').addEventListener('submit', updateOvertimeShift);
                 });
             } catch (error) {
                 console.error('Error fetching overtime shifts:', error);
             }
         }
-        
+    
         async function addOvertimeShift(event) {
             event.preventDefault();
-            
+    
             const date = document.querySelector('#date').value;
             const deskSide = document.querySelector('#deskSide').value;
             const letter = document.querySelector('#letter').value;
-
+            console.log(date, deskSide, letter);
+    
             const newShift = {
                 date: date,
                 deskSide: deskSide,
                 letter: letter,
-                officersList: [], // Assuming empty lists for now
-                operatorsList: []
+                officerList: [],
+                operatorList: []
             };
-            
+    
             try {
                 const response = await fetch('http://localhost:8082/overtime', {
                     method: 'POST',
@@ -202,8 +200,10 @@
                     },
                     body: JSON.stringify(newShift)
                 });
-
+    
                 if (response.ok) {
+                    const jsonResponse = await response.json(); // Parse the JSON response
+                    console.log("json response " + jsonResponse);
                     fetchOvertimeShifts(); // Refresh the tables
                     document.querySelector('#overtime-form').reset(); // Clear form fields
                 } else {
@@ -213,7 +213,44 @@
                 console.error('Error adding overtime shift:', error);
             }
         }
+    
+        async function updateOvertimeShift(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitter = event.submitter;
+            const roleSelect = form.querySelector('#roleSelect').value;
+            const letter = form.querySelector('#letterSelect').value;
+            const shiftId = form.querySelector('#shiftId').value;
+    
+            const updateShiftDetails = {
+                shiftId: shiftId, 
+                submitter: submitter.id,
+                deskSide: roleSelect,
+                letter: letter,
+            }
 
+            try {
+                const response = await fetch(`http://localhost:8082/overtime/update/${shiftId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateShiftDetails)
+                });
+                if (response.ok) {
+                    const jsonResponse = await response.json(); // Parse the JSON response
+                    console.log("json response " + jsonResponse); // Log the JSON response
+                    fetchOvertimeShifts();
+                    form.reset();
+                    console.log("THE RESPONSE IS " + response);
+                } else {
+                    console.error('Error updating overtime shift:', response.statusText);
+                }
+            } catch (error) {
+                console.error('error updating overtime shift', error);
+            }
+        }
+    
         async function deleteOvertimeShift(event) {
             event.preventDefault();
 
@@ -238,68 +275,34 @@
             }
         }
 
-        async function updateOvertimeShift(event) {
-            event.preventDefault();
-            const submitter = event.submitter;
-            const roleSelect = document.querySelector('#roleSelect').value;
-            const letter = document.querySelector('#letterSelect').value;
-            const shiftId = document.querySelector('#shiftId').value;
-            console.log("Submitter:", submitter.id);
-            console.log("Desk Side:", roleSelect);
-            console.log("Letter:", letter);
-            console.log("ID:", shiftId);
-
-            const updateShiftDetails = {
-                shiftId: shiftId, 
-                submitter: submitter.id,
-                deskSide: roleSelect,
-                letter: letter,
-            }
-            try {
-                const response = await fetch(`http://localhost:8082/overtime/update/${shiftId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updateShiftDetails)
-                    });
-
-                if (response.ok) {
-                    const jsonResponse = await response.json(); // Parse the JSON response
-                    console.log("json response " + jsonResponse); // Log the JSON response
-                    fetchOvertimeShifts();
-                    document.querySelector('#update-overtime-shift').reset();
-                    console.log(response)
-                } else {
-                    console.error('Error updating overtime shift:', response.statusText);
-                } 
-            } 
-            catch (error) {
-                    console.error('Error updating overtime shift:', error);
-            }   
-            
-        }        
-
-        // updating cover list of overtime shift
-        function addSelectList(operatorShiftList, officerShiftList, shiftId) {
-            // Create form element
+        function addConfirmAvailabilityForm(operatorShiftList, officerShiftList, shiftId) {
             const form = document.createElement('form');
             form.method = "POST";
             form.id = "update-overtime-shift";
+            
+            const formContainer = document.createElement('div')
+            formContainer.id='update-shift-form';
+            form.appendChild(formContainer);
 
             const hiddenId = document.createElement('input');
             hiddenId.type = 'hidden'; // Setting the type to 'hidden'
             hiddenId.id = 'shiftId';
             hiddenId.value = shiftId;
-            form.appendChild(hiddenId);
-            
-
-
-
-            // Create select element for operator/officer
+            formContainer.appendChild(hiddenId);
+    
+            // role select input --------------------------------------------
             const roleSelect = document.createElement('select');
             roleSelect.name = 'roleSelect';
             roleSelect.id = 'roleSelect';
+            
+
+            // Create and add the default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'select option';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            roleSelect.appendChild(defaultOption);
 
             const operatorOption = document.createElement('option');
             operatorOption.value = 'operator';
@@ -312,32 +315,36 @@
             roleSelect.appendChild(officerOption);
 
             // Append role select element to the form
-            form.appendChild(roleSelect);
+            formContainer.appendChild(roleSelect);
 
+            // letter select input ------------------------------------------            
             // Create and append the letterSelect element to the form
             const letterSelect = document.createElement('select');
             letterSelect.name = 'letterSelect';
             letterSelect.id = 'letterSelect';
-            form.appendChild(letterSelect);
+            formContainer.appendChild(letterSelect);
 
             // Event listener to handle role select changes
             roleSelect.addEventListener('change', function() {
                 letterSelect.innerHTML = '';
-
+                console.log(roleSelect.value);
                 if (roleSelect.value === 'operator') {
-
+                    console.log("true");
+                    console.log(operatorShiftList);
                     operatorShiftList.forEach(function(item) {
+                        console.log("item = " + item);
                         const option = document.createElement('option');
-                        option.value = item;
-                        option.textContent = item;
+                        console.log(item)
+                        option.value = item.letter;
+                        option.textContent = item.letter;
                         letterSelect.appendChild(option);
                     });
                 } else if (roleSelect.value === 'officer') {
 
                     officerShiftList.forEach(function(item) {
                         const option = document.createElement('option');
-                        option.value = item;
-                        option.textContent = item;
+                        option.value = item.letter;
+                        option.textContent = item.letter;
                         letterSelect.appendChild(option);
                     });
                 }
@@ -349,7 +356,7 @@
             confirmButton.id = 'confirmButton';
             confirmButton.value = 'confirm';
             confirmButton.textContent='Confirm';
-            form.appendChild(confirmButton);
+            formContainer.appendChild(confirmButton);
 
             const rejectButton = document.createElement('button');
             rejectButton.type = 'submit';
@@ -357,25 +364,27 @@
             rejectButton.id = 'rejectButton';
             rejectButton.value = 'reject';
             rejectButton.textContent = 'Reject'; // Add text content
-            form.appendChild(rejectButton);
+            formContainer.appendChild(rejectButton);
         
 
             return form;
-}
+        }
+    
+        document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
 
-        
+        // Event delegation for update-overtime-shift form submission
+        document.addEventListener('submit', function(event) {
+            if (event.target && event.target.id === 'update-overtime-shift') {
+                updateOvertimeShift(event);
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', (event) => {
             console.log("dom loaded...")
             document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
             document.querySelector('#delete-overtime-form').addEventListener('submit', deleteOvertimeShift);            
         })
-
         fetchOvertimeShifts();
-        console.log("overtime shifts fetched");
-        
-        
-        
     </script>
 </body>
 </html>

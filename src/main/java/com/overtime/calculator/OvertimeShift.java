@@ -16,20 +16,39 @@ public class OvertimeShift
     private ArrayList<String> coverMetaData;
     private ArrayList<String> officersList = new ArrayList<>();
     private ArrayList<String> operatorsList = new ArrayList<>();
-    private ArrayList<String> removedOperators = new ArrayList<>();
-    private ArrayList<String> removedOfficers = new ArrayList<>();
+    private ArrayList<Boolean> rejectedOfficers = new ArrayList<>();
+    private ArrayList<String> rejectedOfficersList= new ArrayList<>();
+    private ArrayList<String> rejectedOperatorsList= new ArrayList<>();
+    private ArrayList<Boolean> rejectedOperators = new ArrayList<>();
+    private String officerConfirmed;
+    private String deskSideConfirmed;
+    @Column(length = 1000)
+    private ArrayList<Vtso> officerList = new ArrayList<>();
+    @Column(length = 1000)
+    private ArrayList<Vtso> operatorList = new ArrayList<>();
 
 
-    public OvertimeShift(){}
+    public OvertimeShift(){
 
-    public OvertimeShift(LocalDate date, String deskSide, String letter, ArrayList<String>officerList, ArrayList<String>operatorList){
+    }
+
+    public OvertimeShift(LocalDate date, String deskSide, String letter, ArrayList<Vtso>officerList, ArrayList<Vtso>operatorList) {
         this.date = date;
         this.deskSide = deskSide;
         this.letter = letter;
-        this.officersList = officerList;
-        this.operatorsList = operatorList;
+        this.officerList = officerList;
+        this.operatorList = operatorList;
     }
 
+    public void setShiftConfirmed()
+    {
+        for (int i = 0; i < rejectedOperators.size(); i++) {
+            rejectedOperators.set(i, true);
+        }
+        for (int i = 0; i < rejectedOfficers.size(); i++) {
+            rejectedOfficers.set(i, true);
+        }
+    }
 
 
 
@@ -108,30 +127,274 @@ public class OvertimeShift
         this.deskSide = deskSide;
     }
 
-    public void removeLetterFromCoverList(String letter, String deskSide)
+    public void populateRejectedLists()
     {
-        if (deskSide.equals("officer")) {
-            System.out.println(officersList.remove(letter));
-            System.out.println(removedOfficers.add(letter));
-        } else if (deskSide.equals("operator")) {
-            System.out.println(operatorsList.remove(letter));
-            System.out.println(removedOperators.add(letter));
+        if (rejectedOfficers.isEmpty()) {
+            for (String officer : officersList) {
+                rejectedOfficers.add(false);
+            }
+            for (String operator : operatorsList) {
+                rejectedOperators.add(false);
+            }
         }
     }
 
-    public ArrayList<String> getRemovedOperators() {
-        return removedOperators;
+    public void rejectOfficer(String letter, String deskSide)
+    {
+
+        if (deskSide.equals("operator")) {
+            for (Vtso operator : operatorList) {
+                if (operator.getLetter().equals(letter)) {
+                    operator.setCoverRejected();
+                }
+            }
+        }
+
+        if (deskSide.equals("officer")) {
+            for (Vtso officer : officerList) {
+                if (officer.getLetter().equals(letter)) {
+                    officer.setCoverRejected();
+                }
+            }
+        }
     }
 
-    public void setRemovedOperators(ArrayList<String> removedOperators) {
-        this.removedOperators = removedOperators;
+    public void confirmOfficer(String letter, String deskSide)
+    {
+        if (deskSide.equals("operator")) {
+            for (Vtso operator : operatorList) {
+                if (operator.getLetter().equals(letter)) {
+                    operator.setCoverConfirmed();
+                }
+            }
+        }
+
+        if (deskSide.equals("officer")) {
+            for (Vtso officer : officerList) {
+                if (officer.getLetter().equals(letter)) {
+                    officer.setCoverConfirmed();
+                }
+            }
+        }
     }
 
-    public ArrayList<String> getRemovedOfficers() {
-        return removedOfficers;
+
+    public boolean confirmCover(String confirmedLetter, String confirmedDeskSide) {
+        populateRejectedLists();
+
+        if (deskSide.equals("operator")) { // check to see whether the operator or officer needs cover
+            if (rejectedOperators.contains(false)) {
+                String nextOperator = operatorsList.get(rejectedOperators.indexOf(false));
+                if (nextOperator.equals(confirmedLetter) && confirmedDeskSide.equals("operator")) {
+                    setOfficerConfirmed(confirmedLetter);
+                    setDeskSideConfirmed(confirmedDeskSide);
+                    return true;
+                } else if (rejectedOfficers.contains(false)) {
+                    String nextOfficer = officersList.get(rejectedOfficers.indexOf(false));
+                    if (nextOfficer.equals(confirmedLetter) && confirmedDeskSide.equals("officer")) {
+                        setOfficerConfirmed(confirmedLetter);
+                        setDeskSideConfirmed(confirmedDeskSide);
+                        return true;
+                    }
+                }
+            }
+            if (deskSide.equals("officer")) { // check to see whether the operator or officer needs cover
+                if (rejectedOfficers.contains(false)) {
+                    String aNextOfficer = officersList.get(rejectedOfficers.indexOf(false));
+                    if (aNextOfficer.equals(confirmedLetter) && confirmedDeskSide.equals("officer")) {
+                        setOfficerConfirmed(confirmedLetter);
+                        setDeskSideConfirmed(confirmedDeskSide);
+                        return true;
+                    } else if (rejectedOperators.contains(false)) {
+                        String aNextOperator = operatorsList.get(rejectedOperators.indexOf(false));
+                        if (aNextOperator.equals(confirmedLetter) && confirmedDeskSide.equals("operator")) {
+                            setOfficerConfirmed(confirmedLetter);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
-    public void setRemovedOfficers(ArrayList<String> removedOfficers) {
-        this.removedOfficers = removedOfficers;
+    public void removeOfficerFromCoverList(String letter, String deskSide)
+    {
+        if (deskSide.equals("operator")) {
+            int indexOfRemovedOfficer = operatorsList.indexOf(letter);
+            operatorsList.remove(letter);
+            rejectedOperatorsList.add(indexOfRemovedOfficer, letter);
+        } else if (deskSide.equals("officer")) {
+            int indexOfRemovedOfficer = officersList.indexOf(letter);
+            officersList.remove(letter);
+            rejectedOfficersList.add(indexOfRemovedOfficer, letter);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public String getOfficerConfirmed() {
+        return officerConfirmed;
+    }
+
+    public void setOfficerConfirmed(String officerConfirmed) {
+        this.officerConfirmed = officerConfirmed;
+    }
+
+    public String getDeskSideConfirmed() {
+        return deskSideConfirmed;
+    }
+
+    public void setDeskSideConfirmed(String deskSideConfirmed) {
+        this.deskSideConfirmed = deskSideConfirmed;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public ArrayList<Boolean> getRejectedOfficers()
+    {
+        return rejectedOfficers;
+    }
+
+    public ArrayList<Boolean> getRejectedOperators()
+    {
+        return rejectedOperators;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void setRejectedOfficers(ArrayList<Boolean> rejectedOfficers) {
+        this.rejectedOfficers = rejectedOfficers;
+    }
+
+    public void setRejectedOperators(ArrayList<Boolean> rejectedOperators) {
+        this.rejectedOperators = rejectedOperators;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public String toString() {
+        return "OvertimeShift{" +
+                "id=" + id +
+                ", date=" + date +
+                ", deskSide='" + deskSide + '\'' +
+                ", letter='" + letter + '\'' +
+                ", coverMetaData=" + coverMetaData +
+                ", officersList=" + officersList +
+                ", operatorsList=" + operatorsList +
+                ", rejectedOfficers=" + rejectedOfficers +
+                ", rejectedOperators=" + rejectedOperators +
+                ", officerConfirmed='" + officerConfirmed + '\'' +
+                ", deskSideConfirmed='" + deskSideConfirmed + '\'' +
+                '}';
+    }
+
+    public ArrayList<String> getRejectedOfficersList() {
+        return rejectedOfficersList;
+    }
+
+    public void setRejectedOfficersList(ArrayList<String> rejectedOfficersList) {
+        this.rejectedOfficersList = rejectedOfficersList;
+    }
+
+    public ArrayList<String> getRejectedOperatorsList() {
+        return rejectedOperatorsList;
+    }
+
+    public void setRejectedOperatorsList(ArrayList<String> rejectedOperatorsList) {
+        this.rejectedOperatorsList = rejectedOperatorsList;
+    }
+
+    public ArrayList<Vtso> getOfficerList() {
+        return officerList;
+    }
+
+    public void setOfficerList(ArrayList<Vtso> officerList) {
+        this.officerList = officerList;
+    }
+
+    public ArrayList<Vtso> getOperatorList() {
+        return operatorList;
+    }
+
+    public void setOperatorList(ArrayList<Vtso> operatorList) {
+        this.operatorList = operatorList;
     }
 }
