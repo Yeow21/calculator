@@ -26,8 +26,8 @@ public class Vtso implements Serializable
     private int rotationLength;
     private boolean isOnTimeOff;
     private int timeOffLength;
-    private int confirmedCover;
-    private int rejectedCover;
+    private boolean confirmedCover;
+    private boolean rejectedCover;
     private boolean coverConfirmed;
     private boolean coverRejected;
 
@@ -120,6 +120,11 @@ public class Vtso implements Serializable
 
     public void setOnTimeOff(boolean onTimeOff) {
         isOnTimeOff = onTimeOff;
+        if (deskSide.equals("operator")) {
+            setLetter(getLetter() + "(14)");
+        } else {
+            setLetter(getLetter() + ("(10)"));
+        }
     }
 
     public int getTimeOffLength() {
@@ -136,19 +141,19 @@ public class Vtso implements Serializable
         setTimeOffLength(deskSide.equals("officer") ? 10 : 14);
     }
 
-    public int getConfirmedCover() {
+    public boolean getConfirmedCover() {
         return confirmedCover;
     }
 
-    public void setConfirmedCover(int confirmedCover) {
+    public void setConfirmedCover(boolean confirmedCover) {
         this.confirmedCover = confirmedCover;
     }
 
-    public int getRejectedCover() {
+    public boolean getRejectedCover() {
         return rejectedCover;
     }
 
-    public void setRejectedCover(int rejectedCover) {
+    public void setRejectedCover(boolean rejectedCover) {
         this.rejectedCover = rejectedCover;
     }
 
@@ -156,15 +161,16 @@ public class Vtso implements Serializable
         return coverConfirmed;
     }
 
-    public void setCoverConfirmed(boolean coverConfirmed) {
-        this.coverConfirmed = coverConfirmed;
+    public void setCoverConfirmed() {
+        this.coverConfirmed = !this.coverConfirmed;
     }
 
     public boolean isCoverRejected() {
         return coverRejected;
     }
 
-    public void setCoverRejected(boolean coverRejected) {
-        this.coverRejected = coverRejected;
+    public void setCoverRejected() {
+
+        this.coverRejected = !this.coverRejected;
     }
 }

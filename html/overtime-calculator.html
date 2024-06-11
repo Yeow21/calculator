@@ -123,6 +123,7 @@
                 officerTableBody.innerHTML = '';
 
                 overtimeShifts.forEach(shift => {
+                    console.log(shift);
                     const row = document.createElement('tr');
 
                     const idCell = document.createElement('td');
@@ -147,6 +148,7 @@
                     if (shift.deskSide === 'operator') {
                         const operatorsListCell = document.createElement('td');
                         operatorsListCell.textContent = shift.operatorsList.join(', ');
+                        if ()
                         row.appendChild(operatorsListCell);""
 
                         const officersListCell = document.createElement('td');

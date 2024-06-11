@@ -22,9 +22,9 @@ public class OvertimeShift
     private ArrayList<Boolean> rejectedOperators = new ArrayList<>();
     private String officerConfirmed;
     private String deskSideConfirmed;
-    @Column(length = 500)
+    @Column(length = 1000)
     private ArrayList<Vtso> officerList = new ArrayList<>();
-    @Column(length = 500)
+    @Column(length = 1000)
     private ArrayList<Vtso> operatorList = new ArrayList<>();
 
 
@@ -141,18 +141,43 @@ public class OvertimeShift
 
     public void rejectOfficer(String letter, String deskSide)
     {
-        populateRejectedLists();
-        System.out.println("Debug!/ Letter = " + letter + "deskSide = " + deskSide);
 
-        if (deskSide.equals("officer")) {
-            rejectedOfficers.set(officersList.indexOf(letter), true);
-        } else if (deskSide.equals("operator")) {
-            rejectedOperators.set(operatorsList.indexOf(letter), true);
+        if (deskSide.equals("operator")) {
+            for (Vtso operator : operatorList) {
+                if (operator.getLetter().equals(letter)) {
+                    operator.setCoverRejected();
+                }
+            }
         }
 
-        System.out.println(rejectedOperators);
-        System.out.println(rejectedOfficers);
+        if (deskSide.equals("officer")) {
+            for (Vtso officer : officerList) {
+                if (officer.getLetter().equals(letter)) {
+                    officer.setCoverRejected();
+                }
+            }
+        }
     }
+
+    public void confirmOfficer(String letter, String deskSide)
+    {
+        if (deskSide.equals("operator")) {
+            for (Vtso operator : operatorList) {
+                if (operator.getLetter().equals(letter)) {
+                    operator.setCoverConfirmed();
+                }
+            }
+        }
+
+        if (deskSide.equals("officer")) {
+            for (Vtso officer : officerList) {
+                if (officer.getLetter().equals(letter)) {
+                    officer.setCoverConfirmed();
+                }
+            }
+        }
+    }
+
 
     public boolean confirmCover(String confirmedLetter, String confirmedDeskSide) {
         populateRejectedLists();

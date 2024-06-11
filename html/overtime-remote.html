@@ -4,8 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overtime Shifts</title>
-    <link rel="stylesheet" href="styles.css">
-    
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .rejected {
+            color: red;
+            font-weight: bold;
+        }
+
+        .confirmed {
+            color: green;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 <body>
     <h1>Overtime Shifts</h1>
@@ -94,22 +127,20 @@
 
             return operatorContainer;
         }
-        function sortShiftsByDate(shifts) {
-            return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
-        }
+
         async function fetchOvertimeShifts() {
             try {
-                const response = await fetch('http://localhost:8082/overtime');
+                const response = await fetch('http://[2a0c:b381:4b9:8500:7502:2313:2d65:3c17]:8082/overtime');
                 const data = await response.json();
     
-                let overtimeShifts = data._embedded.overtimeShiftList;
+                const overtimeShifts = data._embedded.overtimeShiftList;
     
                 // Clear existing table rows
                 const operatorTableBody = document.querySelector('#operator-table tbody');
                 const officerTableBody = document.querySelector('#officer-table tbody');
                 operatorTableBody.innerHTML = '';
                 officerTableBody.innerHTML = '';
-                overtimeShifts = sortShiftsByDate(overtimeShifts);
+    
                 overtimeShifts.forEach(shift => {
                     console.log(shift);
                     const row = document.createElement('tr');
@@ -139,18 +170,16 @@
                         operatorsListCell.appendChild(createContainer(operator));
                         operatorsListCell.appendChild(document.createTextNode(', '));
                     });
-                    if (operatorsListCell.lastChild) {
                     operatorsListCell.removeChild(operatorsListCell.lastChild);
-                    }
+                               
                     
                     // adding officers ------------------------------------------------------------
                     shift.officerList.forEach(officer => {
                         officersListCell.appendChild(createContainer(officer));
                         officersListCell.appendChild(document.createTextNode(', '))
                     })
-                    if (officersListCell.lastChild) {
-                        officersListCell.removeChild(officersListCell.lastChild);
-                    }
+                    officersListCell.removeChild(officersListCell.lastChild);
+
                     
                     // add each container to the row ----------------------------------------------
                     if (shift.deskSide === 'operator') {
@@ -193,7 +222,7 @@
             };
     
             try {
-                const response = await fetch('http://localhost:8082/overtime', {
+                const response = await fetch('http://[2a0c:b381:4b9:8500:7502:2313:2d65:3c17]:8082/overtime', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -230,7 +259,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:8082/overtime/update/${shiftId}`, {
+                const response = await fetch(`http://[2a0c:b381:4b9:8500:7502:2313:2d65:3c17]:8082/overtime/update/${shiftId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -257,7 +286,7 @@
             const deleteId = document.querySelector('#deleteId').value;
 
             try {
-                const response = await fetch(`http://localhost:8082/overtime/${deleteId}`, {
+                const response = await fetch(`http://[2a0c:b381:4b9:8500:7502:2313:2d65:3c17]:8082/overtime/${deleteId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
@@ -280,21 +309,16 @@
             form.method = "POST";
             form.id = "update-overtime-shift";
             
-            const formContainer = document.createElement('div')
-            formContainer.id='update-shift-form';
-            form.appendChild(formContainer);
-
             const hiddenId = document.createElement('input');
             hiddenId.type = 'hidden'; // Setting the type to 'hidden'
             hiddenId.id = 'shiftId';
             hiddenId.value = shiftId;
-            formContainer.appendChild(hiddenId);
+            form.appendChild(hiddenId);
     
             // role select input --------------------------------------------
             const roleSelect = document.createElement('select');
             roleSelect.name = 'roleSelect';
             roleSelect.id = 'roleSelect';
-            
 
             // Create and add the default option
             const defaultOption = document.createElement('option');
@@ -315,14 +339,14 @@
             roleSelect.appendChild(officerOption);
 
             // Append role select element to the form
-            formContainer.appendChild(roleSelect);
+            form.appendChild(roleSelect);
 
             // letter select input ------------------------------------------            
             // Create and append the letterSelect element to the form
             const letterSelect = document.createElement('select');
             letterSelect.name = 'letterSelect';
             letterSelect.id = 'letterSelect';
-            formContainer.appendChild(letterSelect);
+            form.appendChild(letterSelect);
 
             // Event listener to handle role select changes
             roleSelect.addEventListener('change', function() {
@@ -356,7 +380,7 @@
             confirmButton.id = 'confirmButton';
             confirmButton.value = 'confirm';
             confirmButton.textContent='Confirm';
-            formContainer.appendChild(confirmButton);
+            form.appendChild(confirmButton);
 
             const rejectButton = document.createElement('button');
             rejectButton.type = 'submit';
@@ -364,7 +388,7 @@
             rejectButton.id = 'rejectButton';
             rejectButton.value = 'reject';
             rejectButton.textContent = 'Reject'; // Add text content
-            formContainer.appendChild(rejectButton);
+            form.appendChild(rejectButton);
         
 
             return form;

@@ -54,6 +54,7 @@ public class CalculatorController {
         
         OvertimeShift newShift = newCalculator.getOvertimeShift();
 
+        System.out.println(newShift);
         // Saves the new overtime shift to the repository and converts it to an EntityModel.
         EntityModel<OvertimeShift> entityModel = assembler.toModel(repository.save(newShift));
 
@@ -61,9 +62,8 @@ public class CalculatorController {
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) // Sets the Location header to the URI of the newly created resource.
                 .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
-
     }
-
+    @CrossOrigin
     @PostMapping("/overtime/update/{id}")
     ResponseEntity<?> updateCoverList(@RequestBody Map<String, String> updateShift, @PathVariable Long id) {
         System.out.println("HI!");
@@ -91,8 +91,7 @@ public class CalculatorController {
         if (updateShift.get("submitter").equals("confirmButton")) {
             OvertimeShift updatedShift = repository.findById(id)
                     .map(shift -> {
-                        System.out.println(shift.confirmCover(letter, deskSide));
-                        shift.setShiftConfirmed();
+                        shift.confirmOfficer(letter, deskSide);
                         return repository.save(shift);
                     }).orElseThrow(() -> new OvertimeShiftNotFoundException(id));
             EntityModel<OvertimeShift> entityModel = assembler.toModel(updatedShift);
