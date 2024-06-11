@@ -11,6 +11,8 @@ import java.time.LocalDate;
 @Configuration
 class LoadDatabase {
 
+
+
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
     @Bean
@@ -38,11 +40,11 @@ class LoadDatabase {
 
 
         return args -> {
-            log.info("Preloading " + repository.save(shiftOne));
+            //log.info("Preloading " + repository.save(shiftOne));
 
-            log.info("Preloading {}", repository.save(shiftTwo));
+            //log.info("Preloading {}", repository.save(shiftTwo));
 
-            log.info("Preloading {}", repository.save(shiftThree));
+            //log.info("Preloading {}", repository.save(shiftThree));
         };
     }
 }
