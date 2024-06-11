@@ -42,7 +42,7 @@ class LoadDatabase {
 
             log.info("Preloading {}", repository.save(shiftTwo));
 
-            log.info("Preloading {}", repository.save(shiftThree));
+             log.info("Preloading {}", repository.save(shiftThree));
         };
     }
 }
