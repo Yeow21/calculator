@@ -193,14 +193,6 @@ public class Calculator
                     }
                 }
 
-                // get first person for cover
-                for (Vtso officer : dutyOfficers) {
-                    int daysIntoRotation = officer.daysIntoRotation(date);
-                    if (daysIntoRotation == 6) {
-                        coverList.get("officer").add(officer);
-                    }
-                }
-
                 // get 2nd person for cover
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
@@ -208,6 +200,14 @@ public class Calculator
                     if (daysIntoRotation == 8) {
                         coverList.get("officer").add(officer);
 
+                    }
+                }
+
+                // get first person for cover
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 6) {
+                        coverList.get("officer").add(officer);
                     }
                 }
 
@@ -231,9 +231,11 @@ public class Calculator
                 break;
 
             case 3:
+
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
-                    if (daysIntoRotation == 7) {
+                    if (daysIntoRotation == 21) {
+                        officer.timeOff();
                         coverList.get("officer").add(officer);
                     }
                 }
@@ -241,6 +243,13 @@ public class Calculator
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
                     if (daysIntoRotation == 5) {
+                        coverList.get("officer").add(officer);
+                    }
+                }
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 7) {
                         coverList.get("officer").add(officer);
                     }
                 }
@@ -272,7 +281,7 @@ public class Calculator
 
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
-                    if (daysIntoRotation >= 21 && daysIntoRotation <=25) {
+                    if (daysIntoRotation > 25 && daysIntoRotation < 30) {
                         officer.timeOff();
                         coverList.get("officer").add(officer);
                     }
@@ -280,11 +289,13 @@ public class Calculator
 
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
-                    if (daysIntoRotation > 25) {
+                    if (daysIntoRotation >= 21 && daysIntoRotation <=25) {
                         officer.timeOff();
                         coverList.get("officer").add(officer);
                     }
                 }
+
+
                 break;
             default:
                 System.out.println("No successful case!");

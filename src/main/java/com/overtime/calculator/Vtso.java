@@ -107,6 +107,13 @@ public class Vtso implements Serializable
         // working out the shift number of the person who needs cover
         long daysSinceFirstShift = ChronoUnit.DAYS.between(getFirstShiftDate(), date);
         long daysIntoRotation = daysSinceFirstShift % rotationLength;
+
+
+        if (daysIntoRotation == 20 && this.deskSide == "officer" && !isOnTimeOff) {
+            this.timeOff();
+        }
+
+
         if (daysIntoRotation <= getRotationLengthMinusLeave()) {
             return (int) (daysIntoRotation % 8) + 1;
         } else {
