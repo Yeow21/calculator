@@ -86,8 +86,6 @@ public class Calculator
         return null;
     }
 
-
-
     /**
      * calculate the number of the shift of the person being covered, 1-4
      * @param officer
@@ -116,27 +114,43 @@ public class Calculator
         coverList.put("officer", new ArrayList<Vtso>());
         coverList.put("operator", new ArrayList<Vtso>());
 
-        // filter DO's using stream
+        // Filter officers
         List<Vtso> dutyOfficers = officers
                 .stream()
                 .filter(v -> v.getDeskSide().equals("officer"))
                 .toList();
 
-
-
-        // filer DO's using stream
+        // Filter operators
         List<Vtso> marineOperators = officers
                 .stream()
                 .filter(v -> v.getDeskSide().equals("operator"))
                 .toList();
 
-        int otherShiftNumber = 0;
+
+
+
+
+
+        int otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
+
+        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         System.out.println("shiftNumber = " + shiftNumber + " && otherShiftNumber = " + otherShiftNumber);
-        otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
+
+
+
         int officerShiftNumber = deskSide.equals("officer") ? shiftNumber : otherShiftNumber;
+
+        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         System.out.println("Officer shift number = " + officerShiftNumber);
+
+
         int operatorShiftNumber = deskSide.equals("operator") ? shiftNumber : otherShiftNumber;
+
+        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         System.out.println("Operator shift number = " + operatorShiftNumber);
+
+
+
 
         // calculate officers for cover
         switch (officerShiftNumber) {
@@ -170,6 +184,15 @@ public class Calculator
                 break;
 
             case 2:
+
+                for (Vtso officer : dutyOfficers) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 30) {
+                        officer.timeOff();
+                        coverList.get("officer").add(officer);
+                    }
+                }
+
                 // get first person for cover
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
@@ -191,7 +214,7 @@ public class Calculator
                 // get 2nd person for cover (on 10 off)
                 for (Vtso officer : dutyOfficers) {
                     int daysIntoRotation = officer.daysIntoRotation(date);
-                    if (daysIntoRotation >= 26) {
+                    if (daysIntoRotation >= 26 && daysIntoRotation <= 29) {
                         officer.timeOff();
                         coverList.get("officer").add(officer);
                     }
