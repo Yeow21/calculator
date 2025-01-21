@@ -284,12 +284,18 @@ function addConfirmAvailabilityForm(operatorShiftList, officerShiftList, shiftId
     rejectButton.textContent = 'Reject'; // Add text content
     formContainer.appendChild(rejectButton);
 
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'submit';
+    deleteButton.name = 'delete';
+    deleteButton.id = 'deleteButton';
+    deleteButton.value = 'delete';
+    deleteButton.textContent = 'Delete'; // Add text content
+    formContainer.appendChild(deleteButton);
 
     return form;
 }
 
 document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
-
 // Event delegation for update-overtime-shift form submission
 document.addEventListener('submit', function(event) {
     if (event.target && event.target.id === 'update-overtime-shift') {
@@ -302,4 +308,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelector('#overtime-form').addEventListener('submit', addOvertimeShift);
     document.querySelector('#delete-overtime-form').addEventListener('submit', deleteOvertimeShift);            
 })
+
+// Add this code at the bottom of your existing file
+document.addEventListener('click', async function(event) {
+    if (event.target && event.target.id === 'deleteButton') {
+        event.preventDefault();  // Prevent form submission
+        const form = event.target.closest('form');
+        const shiftId = form.querySelector('#shiftId').value;
+        
+        try {
+            const response = await fetch(`http://localhost:8082/overtime/${shiftId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                fetchOvertimeShifts(); // Refresh the table
+            } else {
+                console.error('Error deleting shift:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error deleting shift:', error);
+        }
+    }
+});
+
+
 fetchOvertimeShifts();

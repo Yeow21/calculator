@@ -113,6 +113,10 @@ public class Vtso implements Serializable
             this.timeOff();
         }
 
+        if (daysIntoRotation == 36 && this.deskSide == "operator" && !isOnTimeOff) {
+            this.timeOff();
+        }
+
 
         if (daysIntoRotation <= getRotationLengthMinusLeave()) {
             return (int) (daysIntoRotation % 8) + 1;
