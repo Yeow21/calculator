@@ -34,6 +34,7 @@ public class Vtso implements Serializable
     private boolean coverConfirmed;
     private boolean coverRejected;
     private boolean isMordo;
+    private boolean crossDesk;
 
     public Vtso() {
     }
@@ -205,5 +206,13 @@ public class Vtso implements Serializable
 
     public void setMordo(boolean mordo) {
         isMordo = mordo;
+    }
+
+    public boolean isCrossDesk() {
+        return crossDesk;
+    }
+
+    public void setCrossDesk(boolean crossDesk) {
+        this.crossDesk = crossDesk;
     }
 }

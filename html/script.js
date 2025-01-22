@@ -15,6 +15,9 @@ function createContainer(operator) {
 function sortShiftsByDate(shifts) {
     return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
+
+
 async function fetchOvertimeShifts() {
     try {
         const response = await fetch('http://localhost:8082/overtime');
@@ -52,11 +55,14 @@ async function fetchOvertimeShifts() {
             const operatorsListCell = document.createElement('td');
             const officersListCell = document.createElement('td');
             const mordoListCell = document.createElement('td');
+            const crossDeskCell = document.createElement('td');
 
             // adding mordos -----------------------------------------------------------
-            shift.officerList.forEach(mordo => {
-                mordoListCell.appendChild(createContainer(mordo))
-                mordoListCell.appendChild(document.createTextNode(', '))
+            shift.operatorList.forEach(operator => {
+                if(operator.mordo && !operator.crossDesk) {
+                    mordoListCell.appendChild(createContainer(operator))
+                    mordoListCell.appendChild(document.createTextNode(', '))
+                }
             });
             if (mordoListCell.lastChild) {
                 mordoListCell.removeChild(mordoListCell.lastChild);
@@ -68,9 +74,24 @@ async function fetchOvertimeShifts() {
                 operatorsListCell.appendChild(document.createTextNode(', '));
             });
             if (operatorsListCell.lastChild) {
-            operatorsListCell.removeChild(operatorsListCell.lastChild);
+                operatorsListCell.removeChild(operatorsListCell.lastChild);
             }
+
+
+
+            // Filtering the cross desk --------------------------------------------------
+            shift.operatorList.forEach(operator => {
+                if (operator.crossDesk) {
+                    crossDeskCell.appendChild(createContainer(operator))
+                    console.log("Cross desk! " + operator.crossDesk);
+
+                    //used later to filter the cross desk operator from operatorsListCell
+                    crossDeskLetter = operator.letter
+                    console.log("Cross desk letter = " + crossDeskLetter)
+                }
+            })
             
+
             // adding officers ------------------------------------------------------------
             shift.officerList.forEach(officer => {
                 officersListCell.appendChild(createContainer(officer));
@@ -85,52 +106,72 @@ async function fetchOvertimeShifts() {
             
             // add each container to the row ----------------------------------------------
             if (shift.deskSide === 'operator') {
-                console.log("got here");
                 row.appendChild(operatorsListCell);
                 row.appendChild(officersListCell);
                 operatorTableBody.appendChild(row);
             }
 
-            // WORKING HERE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+
+
+
+
+
+
             // todo: Work here
-            if (shift.deskSide === 'officer') {
-                console.log("or got here");
-                row.appendChild(officersListCell);
-                row.appendChild(mordoListCell);
+            if (shift.deskSide === 'officer') {                
                 mordoListCell.childNodes.forEach(mordoNode => {
                     if (mordoNode.textContent !== ', ') {
-                        operatorsListCell.childNodes.forEach(operatorNode => {
-                            if (operatorNode.textContent.includes(mordoNode.textContent)) {
-                                console.log("TURUWEUWU")
-                                operatorsListCell.removeChild(operatorNode);
-
+                        let previousWasRemoved = false;
+                        const nodesToRemove = [];
+                        let lastValidNode = null;
+                        
+                        // First pass - mark nodes for removal
+                        operatorsListCell.childNodes.forEach((operatorNode, index) => {
+                            console.log("OPERATOR NODE: " + operatorNode.textContent)
+                            if (operatorNode.textContent.includes(mordoNode.textContent) || operatorNode.textContent.includes(crossDeskLetter)) {
+                                console.log("YES - OPERATOR NODE " + operatorNode.textContent);
+                                nodesToRemove.push(operatorNode);
+                                previousWasRemoved = true;
+                            } else if (operatorNode.textContent === ', ' && previousWasRemoved) {
+                                nodesToRemove.push(operatorNode);
+                            } else {
+                                previousWasRemoved = false;
+                                if (operatorNode.textContent !== ', ') {
+                                    lastValidNode = operatorNode;
+                                }
                             }
+                        });
+                        
+                        // Remove marked nodes
+                        nodesToRemove.forEach(node => console.log("Deleting node " + node.textContent));
+                        nodesToRemove.forEach(node => operatorsListCell.removeChild(node));
+                        
+                        // Clean up trailing commas after all removals
+                        let lastNode = operatorsListCell.lastChild;
+                        while (lastNode && lastNode.textContent === ', ') {
+                            operatorsListCell.removeChild(lastNode);
+                            lastNode = operatorsListCell.lastChild;
                         }
-                    )   
+                    }
+                });
 
-                    }
-                    operatorsListCell.childNodes.forEach(operatorNode => {
-                        if (mordoNode.textContent === operatorNode.textContent) {
-                            operatorsListCell.removeChild(operatorNode);
-                        }
-                    }
-)
-                }
-                )
+                row.appendChild(officersListCell);
+                row.appendChild(crossDeskCell);
+                row.appendChild(mordoListCell);
                 row.appendChild(operatorsListCell);
+
                 officerTableBody.appendChild(row);                 
             }
             
             // add the confirm availability cell functionality
             const confirmListCell = document.createElement('td');
-            confirmListCell.appendChild(addConfirmAvailabilityForm(shift.operatorList, shift.officerList, shift.id))
+            confirmListCell.appendChild(addConfirmAvailabilityForm(shift.operatorList, shift.officerList, shift.id));
             row.appendChild(confirmListCell);
         });
     } catch (error) {
         console.error('Error fetching overtime shifts:', error);
     }
 }
-
 async function addOvertimeShift(event) {
     event.preventDefault();
 

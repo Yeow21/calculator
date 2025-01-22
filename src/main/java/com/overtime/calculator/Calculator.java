@@ -22,6 +22,7 @@ public class Calculator
     private HashMap<String, ArrayList<String>> coverMap;
     private ArrayList<Vtso> officers;
     private int shiftNumber;
+    private int otherShiftNumber;
 
     public Calculator() {
     }
@@ -96,14 +97,10 @@ public class Calculator
 
         // working out the shift number of the person who needs cover
         long daysSinceFirstShift = ChronoUnit.DAYS.between(officer.getFirstShiftDate(), this.getDate());
-        System.out.println("daysSinceFirstShift: " + daysSinceFirstShift);
         long daysIntoRotation = daysSinceFirstShift % officer.getRotationLength();
-        System.out.println("daysIntoRotation: " + daysIntoRotation);
         if (daysIntoRotation <= officer.getRotationLengthMinusLeave()) {
             shiftNumber = (int) (daysIntoRotation % 8) + 1;
-            System.out.println("shiftNumber = " + shiftNumber);
         }
-
         return shiftNumber;
     }
 
@@ -128,28 +125,9 @@ public class Calculator
 
 
 
-
-
-
-        int otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
-
-        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        System.out.println("shiftNumber = " + shiftNumber + " && otherShiftNumber = " + otherShiftNumber);
-
-
-
+        otherShiftNumber = shiftNumber == 1 || shiftNumber == 3 ? shiftNumber + 1 : shiftNumber - 1;
         int officerShiftNumber = deskSide.equals("officer") ? shiftNumber : otherShiftNumber;
-
-        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        System.out.println("Officer shift number = " + officerShiftNumber);
-
-
         int operatorShiftNumber = deskSide.equals("operator") ? shiftNumber : otherShiftNumber;
-
-        // DEBUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        System.out.println("Operator shift number = " + operatorShiftNumber);
-
-
 
 
         // calculate officers for cover
@@ -330,6 +308,18 @@ public class Calculator
                         coverList.get("operator").add(officer);
                     }
                 }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    System.out.println("DEBUG---------------------------------");
+                    System.out.println("Days into rotation " + daysIntoRotation);
+                    if (daysIntoRotation == 1) {
+                        if (officer.isMordo() && deskSide.equals("officer")) {
+                            officer.setCrossDesk(true);
+                            coverList.get("operator").add(officer);
+                        }
+                    }
+                }
                 break;
             case 2:
 
@@ -373,6 +363,16 @@ public class Calculator
                         coverList.get("operator").add(officer);
                     }
                 }
+
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 2) {
+                        if (officer.isMordo() && deskSide.equals("officer")) {
+                            officer.setCrossDesk(true);
+                            coverList.get("operator").add(officer);
+                        }
+                    }
+                }
                 break;
 
             case 3:
@@ -410,6 +410,16 @@ public class Calculator
                     }
                 }
 
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 3) {
+                        if (officer.isMordo() && deskSide.equals("officer")) {
+                            officer.setCrossDesk(true);
+                            coverList.get("operator").add(officer);
+                        }
+                    }
+                }
+
                 break;
 
             case 4:
@@ -436,6 +446,15 @@ public class Calculator
                     }
                 }
 
+                for (Vtso officer : marineOperators) {
+                    int daysIntoRotation = officer.daysIntoRotation(date);
+                    if (daysIntoRotation == 4) {
+                        if (officer.isMordo() && deskSide.equals("officer")) {
+                            officer.setCrossDesk(true);
+                            coverList.get("operator").add(officer);
+                        }
+                    }
+                }
 
                 break;
         }
