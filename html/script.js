@@ -24,6 +24,7 @@ async function fetchOvertimeShifts() {
         const data = await response.json();
 
         let overtimeShifts = data._embedded.overtimeShiftList;
+        let crossDeskLetter = '';
 
         // Clear existing table rows
         const operatorTableBody = document.querySelector('#operator-table tbody');
