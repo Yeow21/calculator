@@ -6,8 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Entity
-public class OvertimeShift
-{
+public class OvertimeShift {
     private @Id
     @GeneratedValue long id;
     private LocalDate date;
@@ -17,8 +16,8 @@ public class OvertimeShift
     private ArrayList<String> officersList = new ArrayList<>();
     private ArrayList<String> operatorsList = new ArrayList<>();
     private ArrayList<Boolean> rejectedOfficers = new ArrayList<>();
-    private ArrayList<String> rejectedOfficersList= new ArrayList<>();
-    private ArrayList<String> rejectedOperatorsList= new ArrayList<>();
+    private ArrayList<String> rejectedOfficersList = new ArrayList<>();
+    private ArrayList<String> rejectedOperatorsList = new ArrayList<>();
     private ArrayList<Boolean> rejectedOperators = new ArrayList<>();
     private String officerConfirmed;
     private String deskSideConfirmed;
@@ -28,11 +27,11 @@ public class OvertimeShift
     private ArrayList<Vtso> operatorList = new ArrayList<>();
 
 
-    public OvertimeShift(){
+    public OvertimeShift() {
 
     }
 
-    public OvertimeShift(LocalDate date, String deskSide, String letter, ArrayList<Vtso>officerList, ArrayList<Vtso>operatorList) {
+    public OvertimeShift(LocalDate date, String deskSide, String letter, ArrayList<Vtso> officerList, ArrayList<Vtso> operatorList) {
         this.date = date;
         this.deskSide = deskSide;
         this.letter = letter;
@@ -40,8 +39,7 @@ public class OvertimeShift
         this.operatorList = operatorList;
     }
 
-    public void setShiftConfirmed()
-    {
+    public void setShiftConfirmed() {
         for (int i = 0; i < rejectedOperators.size(); i++) {
             rejectedOperators.set(i, true);
         }
@@ -49,7 +47,6 @@ public class OvertimeShift
             rejectedOfficers.set(i, true);
         }
     }
-
 
 
     public LocalDate getDate() {
@@ -81,8 +78,7 @@ public class OvertimeShift
     }
 
 
-    public ArrayList<Vtso> populateOfficers()
-    {
+    public ArrayList<Vtso> populateOfficers() {
         ArrayList<Vtso> officers = new ArrayList<>();
         officers.add(new Vtso("Joe", "A", 1, 13, "officer"));
         officers.add(new Vtso("Jonathan", "B", 1, 19, "officer"));
@@ -92,7 +88,7 @@ public class OvertimeShift
 
         officers.add(new Vtso("Ben", "A", 2, 19, "operator"));
         officers.add(new Vtso("Kevin", "B", 1, 20, "operator"));
-        officers.add(new Vtso("Sam", "C", 1, 10, "operator"));
+        officers.add(new Vtso("Charlotte", "C", 1, 10, "operator"));
         officers.add(new Vtso("Iguana", "D", 1, 30, "operator"));
         officers.add(new Vtso("Chris", "E", 2, 9, "operator"));
         return officers;
@@ -127,8 +123,7 @@ public class OvertimeShift
         this.deskSide = deskSide;
     }
 
-    public void populateRejectedLists()
-    {
+    public void populateRejectedLists() {
         if (rejectedOfficers.isEmpty()) {
             for (String officer : officersList) {
                 rejectedOfficers.add(false);
@@ -139,8 +134,7 @@ public class OvertimeShift
         }
     }
 
-    public void rejectOfficer(String letter, String deskSide)
-    {
+    public void rejectOfficer(String letter, String deskSide) {
 
         if (deskSide.equals("operator")) {
             for (Vtso operator : operatorList) {
@@ -159,8 +153,7 @@ public class OvertimeShift
         }
     }
 
-    public void confirmOfficer(String letter, String deskSide)
-    {
+    public void confirmOfficer(String letter, String deskSide) {
         if (deskSide.equals("operator")) {
             for (Vtso operator : operatorList) {
                 if (operator.getLetter().equals(letter)) {
@@ -218,8 +211,7 @@ public class OvertimeShift
         return false;
     }
 
-    public void removeOfficerFromCoverList(String letter, String deskSide)
-    {
+    public void removeOfficerFromCoverList(String letter, String deskSide) {
         if (deskSide.equals("operator")) {
             int indexOfRemovedOfficer = operatorsList.indexOf(letter);
             operatorsList.remove(letter);
@@ -230,32 +222,6 @@ public class OvertimeShift
             rejectedOfficersList.add(indexOfRemovedOfficer, letter);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public String getOfficerConfirmed() {
@@ -275,48 +241,13 @@ public class OvertimeShift
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public ArrayList<Boolean> getRejectedOfficers()
-    {
+    public ArrayList<Boolean> getRejectedOfficers() {
         return rejectedOfficers;
     }
 
-    public ArrayList<Boolean> getRejectedOperators()
-    {
+    public ArrayList<Boolean> getRejectedOperators() {
         return rejectedOperators;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public void setRejectedOfficers(ArrayList<Boolean> rejectedOfficers) {
@@ -326,27 +257,6 @@ public class OvertimeShift
     public void setRejectedOperators(ArrayList<Boolean> rejectedOperators) {
         this.rejectedOperators = rejectedOperators;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     @Override

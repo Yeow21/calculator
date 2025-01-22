@@ -9,6 +9,9 @@ import jakarta.persistence.Id;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+
+import java.util.ArrayList;
 
 /**
  *
@@ -30,6 +33,8 @@ public class Vtso implements Serializable
     private boolean rejectedCover;
     private boolean coverConfirmed;
     private boolean coverRejected;
+    private boolean isMordo;
+    private boolean crossDesk;
 
     public Vtso() {
     }
@@ -44,6 +49,17 @@ public class Vtso implements Serializable
             rotationLength = 50;
         } else {
             rotationLength = 30;
+        }
+
+        // currently qualified mordos
+        ArrayList<String> mordos = new ArrayList<>();
+        mordos.add("A");
+        mordos.add("E");
+
+        if (deskSide.equals("operator") && mordos.contains(letter) ) {
+            isMordo = true;
+        } else {
+            isMordo = false;
         }
     }
 
@@ -107,6 +123,16 @@ public class Vtso implements Serializable
         // working out the shift number of the person who needs cover
         long daysSinceFirstShift = ChronoUnit.DAYS.between(getFirstShiftDate(), date);
         long daysIntoRotation = daysSinceFirstShift % rotationLength;
+
+
+        if (daysIntoRotation == 20 && Objects.equals(this.deskSide, "officer") && !isOnTimeOff) {
+            this.timeOff();
+        }
+
+        if (daysIntoRotation == 36 && Objects.equals(this.deskSide, "operator") && !isOnTimeOff) {
+            this.timeOff();
+        }
+        
         if (daysIntoRotation <= getRotationLengthMinusLeave()) {
             return (int) (daysIntoRotation % 8) + 1;
         } else {
@@ -172,5 +198,21 @@ public class Vtso implements Serializable
     public void setCoverRejected() {
 
         this.coverRejected = !this.coverRejected;
+    }
+
+    public boolean isMordo() {
+        return isMordo;
+    }
+
+    public void setMordo(boolean mordo) {
+        isMordo = mordo;
+    }
+
+    public boolean isCrossDesk() {
+        return crossDesk;
+    }
+
+    public void setCrossDesk(boolean crossDesk) {
+        this.crossDesk = crossDesk;
     }
 }

@@ -1,58 +1,231 @@
 :root {
-    font-family: Arial, sans-serif;
-    font-size: 14;
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --background-color: #f5f6fa;
+    --success-color: #27ae60;
+    --error-color: #e74c3c;
+    --border-color: #dcdde1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
 }
 
+/* Add at the start of your CSS */
+.page-container {
+    max-width: 1400px;  /* Sensible max width */
+    margin: 0 auto;     /* Center the content */
+    padding: 0 20px;    /* Padding on smaller screens */
+}
+
+@media (max-width: 1440px) {
+    .page-container {
+        max-width: 95%;
+    }
+}
+
+
+
+body {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Table Styles */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
-}
-table, th, td {
-    border: 1px solid black;
-}
-th, td {
-    padding: 15px;
-    text-align: left;
-}
-th {
-    background-color: #f2f2f2;
-}
-form {
-    margin-bottom: 20px;
-}
-label, input, select {
-    display: block;
-    margin-bottom: 10px;
+    margin-bottom: 2rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
 }
 
+th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--background-color);
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Form Styles */
+form {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+legend {
+    color: var(--secondary-color);
+    font-weight: 600;
+    padding: 0 0.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 14px;
+}
+
+button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Status Classes */
 .rejected {
-    color: red;
-    font-weight: bold;
+    color: var(--error-color);
+    font-weight: 600;
 }
 
 .confirmed {
-    color: green;
-    font-weight: bold;
+    color: var(--success-color);
+    font-weight: 600;
 }
 
+/* Update Form Styles */
+#update-shift-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-/* styles for update overtime shift form ----------------------------------------------------------*/
-/* Styles for update overtime shift form container */
-/* styles for elements inside the update overtime shift form */
 #update-shift-form select,
-#update-shift-form input,
-#update-shift-form button {
-    display: inline-block;
-    margin-right: 10px; /* Adjust margin as needed */
+#update-shift-form input {
+    width: auto;
+    margin-bottom: 0;
 }
 
-/* Adjust specific elements */
+#update-shift-form button {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+#confirmButton {
+    background-color: var(--success-color);
+}
+
+#rejectButton {
+    background-color: var(--error-color);
+}
+
+#deleteButton {
+    background-color: var(--secondary-color);
+}
+
+
+table {
+    width: 100%;
+    min-width: 800px;   /* Minimum width before scrolling */
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+/* Table container with responsive behavior */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    /* Smooth scrolling on touch devices */
+    -webkit-overflow-scrolling: touch;
+}
+
+th, td {
+    padding: 8px 12px;  /* Reduced padding */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;  /* Slightly smaller font */
+}
+
+/* Target the Confirm Availability column in both tables */
+#operator-table th:last-child,
+#operator-table td:last-child,
+#officer-table th:last-child,
+#officer-table td:last-child {
+    width: 180px;  /* Slightly reduced width */
+}
+
+/* Adjust the Update Form Styles */
+#update-shift-form {
+    display: flex;
+    align-items: center;
+    gap: 4px;  /* Reduced gap */
+    flex-wrap: wrap;  /* Allow wrapping if needed */
+}
+
+#update-shift-form button {
+    padding: 4px 8px;  /* Reduced padding */
+    font-size: 12px;  /* Smaller font size */
+}
+
+/* Make the select inputs in the form smaller */
 #update-shift-form select {
-    width: auto; /* Adjust width as needed */
+    padding: 4px 8px;
+    font-size: 12px;
 }
 
-#update-shift-form button {
-    padding: 8px 16px; /* Adjust padding as needed */
-    cursor: pointer;
+/* Add responsive adjustments */
+@media (max-width: 1200px) {
+    th, td {
+        padding: 8px 12px;  /* Slightly reduced padding */
+    }
+    
+    #update-shift-form {
+        gap: 4px;
+    }
+}
+
+@media (min-width: 1201px) {
+    th, td {
+        padding: 12px 16px;  /* More padding on larger screens */
+    }
+    
+    #update-shift-form {
+        gap: 8px;
+    }
 }
