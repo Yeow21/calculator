@@ -49,6 +49,8 @@ public class CalculatorController {
         return CollectionModel.of(shifts, linkTo(methodOn(CalculatorController.class).all()).withSelfRel());
     }
 
+
+    // Add new overtime shift to DB
     @PostMapping("/overtime") // Maps HTTP POST requests to /overtime to this method.
     ResponseEntity<?> newShift(@RequestBody Calculator newCalculator) { // Indicates that the request body should be deserialized into an OvertimeShift object.
         
@@ -63,6 +65,9 @@ public class CalculatorController {
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) // Sets the Location header to the URI of the newly created resource.
                 .body(entityModel); // Sets the body of the response to the EntityModel representation of the new shift.
     }
+
+
+
     @CrossOrigin
     @PostMapping("/overtime/update/{id}")
     ResponseEntity<?> updateCoverList(@RequestBody Map<String, String> updateShift, @PathVariable Long id) {

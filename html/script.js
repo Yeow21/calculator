@@ -51,6 +51,16 @@ async function fetchOvertimeShifts() {
 
             const operatorsListCell = document.createElement('td');
             const officersListCell = document.createElement('td');
+            const mordoListCell = document.createElement('td');
+
+            // adding mordos -----------------------------------------------------------
+            shift.officerList.forEach(mordo => {
+                mordoListCell.appendChild(createContainer(mordo))
+                mordoListCell.appendChild(document.createTextNode(', '))
+            });
+            if (mordoListCell.lastChild) {
+                mordoListCell.removeChild(mordoListCell.lastChild);
+            }
             
             // adding operators ---------------------------------------------------------
             shift.operatorList.forEach(operator => {
@@ -65,10 +75,13 @@ async function fetchOvertimeShifts() {
             shift.officerList.forEach(officer => {
                 officersListCell.appendChild(createContainer(officer));
                 officersListCell.appendChild(document.createTextNode(', '))
-            })
+            });
             if (officersListCell.lastChild) {
                 officersListCell.removeChild(officersListCell.lastChild);
             }
+
+
+  
             
             // add each container to the row ----------------------------------------------
             if (shift.deskSide === 'operator') {
@@ -77,10 +90,34 @@ async function fetchOvertimeShifts() {
                 row.appendChild(officersListCell);
                 operatorTableBody.appendChild(row);
             }
+
+            // WORKING HERE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+            // todo: Work here
             if (shift.deskSide === 'officer') {
                 console.log("or got here");
                 row.appendChild(officersListCell);
-                row.appendChild(operatorsListCell); 
+                row.appendChild(mordoListCell);
+                mordoListCell.childNodes.forEach(mordoNode => {
+                    if (mordoNode.textContent !== ', ') {
+                        operatorsListCell.childNodes.forEach(operatorNode => {
+                            if (operatorNode.textContent.includes(mordoNode.textContent)) {
+                                console.log("TURUWEUWU")
+                                operatorsListCell.removeChild(operatorNode);
+
+                            }
+                        }
+                    )   
+
+                    }
+                    operatorsListCell.childNodes.forEach(operatorNode => {
+                        if (mordoNode.textContent === operatorNode.textContent) {
+                            operatorsListCell.removeChild(operatorNode);
+                        }
+                    }
+)
+                }
+                )
+                row.appendChild(operatorsListCell);
                 officerTableBody.appendChild(row);                 
             }
             
@@ -309,7 +346,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelector('#delete-overtime-form').addEventListener('submit', deleteOvertimeShift);            
 })
 
-// Add this code at the bottom of your existing file
+// Event listener to delete record
 document.addEventListener('click', async function(event) {
     if (event.target && event.target.id === 'deleteButton') {
         event.preventDefault();  // Prevent form submission
