@@ -27,6 +27,11 @@ public class CalculatorController {
         this.assembler = assembler;
     }
 
+    @GetMapping("/overtime-new")
+    public String serveOvertimePage() {
+        return "overtime-new";
+    }
+
     // single item
     @GetMapping("/overtime/{id}")
     EntityModel<OvertimeShift> one(@PathVariable Long id) {
