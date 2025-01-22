@@ -59,17 +59,17 @@ public class Calculator
     public void populateOfficers()
     {
         officers = new ArrayList<>();
-        officers.add(new Vtso("Joe", "A", 1, 13, "officer"));
-        officers.add(new Vtso("Jonathan", "B", 1, 19, "officer"));
-        officers.add(new Vtso("Luke", "C", 1, 25, "officer"));
-        officers.add(new Vtso("Fraser", "D", 1, 31, "officer"));
-        officers.add(new Vtso("George", "E", 2, 6, "officer"));
+        officers.add(new Vtso("1", "A", 1, 13, "officer"));
+        officers.add(new Vtso("2", "B", 1, 19, "officer"));
+        officers.add(new Vtso("3", "C", 1, 25, "officer"));
+        officers.add(new Vtso("4", "D", 1, 31, "officer"));
+        officers.add(new Vtso("5", "E", 2, 6, "officer"));
 
-        officers.add(new Vtso("Ben", "A", 2, 19, "operator"));
-        officers.add(new Vtso("Kevin", "B", 1, 20, "operator"));
-        officers.add(new Vtso("Sam", "C", 1, 10, "operator"));
-        officers.add(new Vtso("Iguana", "D", 1, 30, "operator"));
-        officers.add(new Vtso("Chris", "E", 2, 9, "operator"));
+        officers.add(new Vtso("6", "A", 2, 19, "operator"));
+        officers.add(new Vtso("7", "B", 1, 20, "operator"));
+        officers.add(new Vtso("8", "C", 1, 10, "operator"));
+        officers.add(new Vtso("9", "D", 1, 30, "operator"));
+        officers.add(new Vtso("10", "E", 2, 9, "operator"));
     }
 
 
