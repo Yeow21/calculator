@@ -20,7 +20,7 @@ function sortShiftsByDate(shifts) {
 
 async function fetchOvertimeShifts() {
     try {
-        const response = await fetch('http://localhost:8082/overtime');
+        const response = await fetch('/overtime');
         const data = await response.json();
 
         let overtimeShifts = data._embedded.overtimeShiftList;
@@ -190,7 +190,7 @@ async function addOvertimeShift(event) {
     };
 
     try {
-        const response = await fetch('http://localhost:8082/overtime', {
+        const response = await fetch('/overtime', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -227,7 +227,7 @@ async function updateOvertimeShift(event) {
     }
 
     try {
-        const response = await fetch(`http://localhost:8082/overtime/update/${shiftId}`, {
+        const response = await fetch(`/overtime/update/${shiftId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -254,7 +254,7 @@ async function deleteOvertimeShift(event) {
     const deleteId = document.querySelector('#deleteId').value;
 
     try {
-        const response = await fetch(`http://localhost:8082/overtime/${deleteId}`, {
+        const response = await fetch(`/overtime/${deleteId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -396,7 +396,7 @@ document.addEventListener('click', async function(event) {
         const shiftId = form.querySelector('#shiftId').value;
         
         try {
-            const response = await fetch(`http://localhost:8082/overtime/${shiftId}`, {
+            const response = await fetch(`/overtime/${shiftId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
