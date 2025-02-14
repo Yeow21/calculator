@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stateboard</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .available {
+            background-color: #d4edda; /* Green for available */
+        }
+        .uncertain {
+            background-color: #fff3cd; /* Yellow for uncertain */
+        }
+        .unavailable {
+            background-color: #f8d7da; /* Red for unavailable */
+        }
+        .adjust-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Stateboard - 5-Day Availability</h1>
+
+<h2>Availability Overview</h2>
+<table id="availability-table">
+    <thead>
+    <tr>
+        <th>Asset</th>
+        <!-- Dates will be populated by JavaScript -->
+        <!-- "Adjust Availability" header will be added by JavaScript -->
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Rows will be populated by JavaScript -->
+    </tbody>
+</table>
+
+<script>
+    // Function to format dates as YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Function to generate the next 5 days starting from today
+    function getNextFiveDays() {
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 5; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            dates.push(formatDate(date));
+        }
+        return dates;
+    }
+
+    // Function to map availability status to a CSS class
+    function getStatusClass(status) {
+        if (status === 2) return 'available';
+        if (status === 1) return 'uncertain';
+        return 'unavailable';
+    }
+
+    // Function to populate the table
+    async function populateTable() {
+        const dates = getNextFiveDays();
+        const tableHead = document.querySelector('#availability-table thead tr');
+        const tableBody = document.querySelector('#availability-table tbody');
+
+        // Add date headers
+        dates.forEach(date => {
+            const th = document.createElement('th');
+            th.textContent = date;
+            tableHead.appendChild(th);
+        });
+
+        // Add "Adjust Availability" header after the date headers
+        const adjustHeader = document.createElement('th');
+        adjustHeader.textContent = 'Adjust Availability';
+        tableHead.appendChild(adjustHeader);
+
+        // Fetch data for all entities
+        const [tugs, pilots, pilotBoats] = await Promise.all([
+            fetch('/stateboard/tugs').then(response => response.json()),
+            fetch('/stateboard/pilots').then(response => response.json()),
+            fetch('/stateboard/pilotBoats').then(response => response.json())
+        ]);
+
+        // Combine all assets into a single list
+        const assets = [
+            ...tugs._embedded.tugList.map(tug => ({ type: 'Tug', id: tug.id, name: tug.name, availability: tug.availability })),
+            ...pilots._embedded.pilotList.map(pilot => ({ type: 'Pilot', id: pilot.id, name: pilot.pilotNumber, availability: pilot.availability })),
+            ...pilotBoats._embedded.pilotBoatList.map(pilotBoat => ({ type: 'PilotBoat', id: pilotBoat.id, name: pilotBoat.name, availability: pilotBoat.availability }))
+        ];
+
+        // Populate the table body
+        assets.forEach(asset => {
+            const row = document.createElement('tr');
+            const assetCell = document.createElement('td');
+            assetCell.textContent = `${asset.type}: ${asset.name}`;
+            row.appendChild(assetCell);
+
+            // Populate availability cells
+            asset.availability.forEach(status => {
+                const cell = document.createElement('td');
+                cell.textContent = status === 2 ? 'Available' : status === 1 ? 'Uncertain' : 'Unavailable';
+                cell.className = getStatusClass(status);
+                row.appendChild(cell);
+            });
+
+            // Add adjustment form
+            const adjustCell = document.createElement('td');
+            const form = document.createElement('form');
+            form.className = 'adjust-form';
+
+            // Date dropdown
+            const dateSelect = document.createElement('select');
+            dates.forEach((date, index) => {
+                const option = document.createElement('option');
+                option.value = index; // Use index to map to the availability array
+                option.textContent = date;
+                dateSelect.appendChild(option);
+            });
+
+            // Status dropdown
+            const statusSelect = document.createElement('select');
+            const statusOptions = [
+                { value: 2, text: 'Available' },
+                { value: 1, text: 'Uncertain' },
+                { value: 0, text: 'Unavailable' }
+            ];
+            statusOptions.forEach(option => {
+                const element = document.createElement('option');
+                element.value = option.value;
+                element.textContent = option.text;
+                statusSelect.appendChild(element);
+            });
+
+            // Submit button
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Update';
+
+            // Form submission handler
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                const selectedDateIndex = parseInt(dateSelect.value); // Get the selected date index
+                const selectedStatus = parseInt(statusSelect.value); // Get the selected status
+
+                // Send the update to the backend
+                fetch('/stateboard/updateAvailability', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        assetType: asset.type,
+                        assetId: asset.id,
+                        dateIndex: selectedDateIndex,
+                        status: selectedStatus
+                    }),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the page to reflect the changes
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to update availability');
+                    }
+                })
+                .catch(error => console.error('Error updating availability:', error));
+            });
+
+            // Append form elements
+            form.appendChild(dateSelect);
+            form.appendChild(statusSelect);
+            form.appendChild(submitButton);
+            adjustCell.appendChild(form);
+            row.appendChild(adjustCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Call the function to populate the table
+    populateTable().catch(error => console.error('Error populating table:', error));
+</script>
+</body>
+</html>
