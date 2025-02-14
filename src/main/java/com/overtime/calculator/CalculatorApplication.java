@@ -2,6 +2,7 @@ package com.overtime.calculator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * two annotations that results in web requests returning data rather than a view.
  */
 @SpringBootApplication
+@EnableScheduling
 public class CalculatorApplication {
 
 	public static void main(String[] args) {
